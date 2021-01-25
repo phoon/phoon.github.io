@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RabbitMQ on 瘋魔</title>
+    <link>/tags/rabbitmq/</link>
+    <description>Recent content in RabbitMQ on 瘋魔</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
+    <lastBuildDate>Sun, 03 Feb 2019 00:00:00 +0000</lastBuildDate><atom:link href="/tags/rabbitmq/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RabbitMQ初涉以及Golang实践</title>
+      <link>/post/2019/02/03/learn-rabbitmq-with-golang/</link>
+      <pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019/02/03/learn-rabbitmq-with-golang/</guid>
+      <description>在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取</description>
+    </item>
+    
+  </channel>
+</rss>

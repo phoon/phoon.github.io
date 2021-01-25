@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Golang on 瘋魔</title>
+    <link>/categories/golang/</link>
+    <description>Recent content in Golang on 瘋魔</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
+    <lastBuildDate>Sat, 09 Mar 2019 12:48:04 +0800</lastBuildDate><atom:link href="/categories/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>在Golang中对MySQL进行操作</title>
+      <link>/post/2019/03/09/working-with-mysql-in-golang/</link>
+      <pubDate>Sat, 09 Mar 2019 12:48:04 +0800</pubDate>
+      
+      <guid>/post/2019/03/09/working-with-mysql-in-golang/</guid>
+      <description>Golang官方并没有提供数据库驱动，但通过database/sql/driver包来提供了实现驱动的标准接口。可以在Github上找到很多</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ初涉以及Golang实践</title>
+      <link>/post/2019/02/03/learn-rabbitmq-with-golang/</link>
+      <pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2019/02/03/learn-rabbitmq-with-golang/</guid>
+      <description>在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取</description>
+    </item>
+    
+    <item>
+      <title>Golang中range指针数据的坑</title>
+      <link>/post/2019/02/01/golang-range-pointer-problem/</link>
+      <pubDate>Fri, 01 Feb 2019 17:22:51 +0800</pubDate>
+      
+      <guid>/post/2019/02/01/golang-range-pointer-problem/</guid>
+      <description>在Golang中使用for range语句进行迭代非常的便捷，但在涉及到指针时就得小心一点了。 下面的代码中定义了一个元素类型为*int的通道c</description>
+    </item>
+    
+  </channel>
+</rss>

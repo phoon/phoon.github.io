@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on 瘋魔</title>
+    <link>/categories/</link>
+    <description>Recent content in Categories on 瘋魔</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
+    <lastBuildDate>Thu, 15 Aug 2019 23:18:49 +0800</lastBuildDate><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux</title>
+      <link>/categories/linux/</link>
+      <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
+      
+      <guid>/categories/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>折腾</title>
+      <link>/categories/%E6%8A%98%E8%85%BE/</link>
+      <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
+      
+      <guid>/categories/%E6%8A%98%E8%85%BE/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Golang</title>
+      <link>/categories/golang/</link>
+      <pubDate>Sat, 09 Mar 2019 12:48:04 +0800</pubDate>
+      
+      <guid>/categories/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>后端</title>
+      <link>/categories/%E5%90%8E%E7%AB%AF/</link>
+      <pubDate>Sat, 09 Mar 2019 12:48:04 +0800</pubDate>
+      
+      <guid>/categories/%E5%90%8E%E7%AB%AF/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

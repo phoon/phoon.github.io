@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>折腾 on 瘋魔</title>
+    <link>/categories/%E6%8A%98%E8%85%BE/</link>
+    <description>Recent content in 折腾 on 瘋魔</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
+    <lastBuildDate>Thu, 15 Aug 2019 23:18:49 +0800</lastBuildDate><atom:link href="/categories/%E6%8A%98%E8%85%BE/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>解决Archlinux下蓝牙鼠标滞后感严重的问题</title>
+      <link>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</link>
+      <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
+      
+      <guid>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</guid>
+      <description>契机 最近入手了Logitech MX Anywhere 2S鼠标，欣喜的在Arch中连接上蓝牙一试，瞬间傻眼&amp;hellip; 移动鼠标，指针掉帧严重，有很重的滞后感</description>
+    </item>
+    
+    <item>
+      <title>替换云服务器操作系统为Archlinux</title>
+      <link>/post/2018/12/07/replace-server-os-with-archlinux/</link>
+      <pubDate>Fri, 07 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2018/12/07/replace-server-os-with-archlinux/</guid>
+      <description>操作环境： 支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云） Ubuntu 16.04 服务器 准备工作 对于不支持DHCP的厂商，需要我们自己去手动配置服务</description>
+    </item>
+    
+    <item>
+      <title>使用Certbot签发免费泛域名SSL证书</title>
+      <link>/post/2018/12/04/free-ssl-with-certbot/</link>
+      <pubDate>Tue, 04 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2018/12/04/free-ssl-with-certbot/</guid>
+      <description>服务器环境： Archlinux Nginx1.15.6（自行编译） （1）安装Certbot 1 sudo pacman -S certbot （2）开始签发 因为我的Nginx是自行编译的，所以无法使用</description>
+    </item>
+    
+    <item>
+      <title>Replace Ubuntu on WSL with Archlinux</title>
+      <link>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</link>
+      <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</guid>
+      <description>&lt;h2 id=&#34;契机&#34;&gt;契机&lt;/h2&gt;
+&lt;p&gt;Windows10的WSL[Windows Subsystem for Linux]在2017秋季更新后修复了大量的BUG。不过对于WSL,之前我一直处于围观状态，嗯，作为一位狂热Linuxer，怎么能随便投身Windows呢呵呵。&lt;/p&gt;
+&lt;p&gt;在最初的时候，WSL还只有Ubuntu，到现在应用商店里提供了有Fedora、Debian、SUSE和KALI。呃&amp;hellip;等等，怎么能没有我们优秀的Archlinux呢？作为Archlinuxer第一个不服。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
