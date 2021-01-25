@@ -1,23 +1,64 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" 
+  xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+  xmlns:dc="http://purl.org/dc/elements/1.1/" 
+  xmlns:atom="http://www.w3.org/2005/Atom" 
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" 
+  xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>WSL on 瘋魔</title>
     <link>/tags/wsl/</link>
     <description>Recent content in WSL on 瘋魔</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>zh</language>
     <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
-    <lastBuildDate>Mon, 18 Jun 2018 00:00:00 +0000</lastBuildDate><atom:link href="/tags/wsl/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Replace Ubuntu on WSL with Archlinux</title>
-      <link>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</link>
-      <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+    <lastBuildDate>Mon, 18 Jun 2018 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/wsl/index.xml" rel="self" type="application/rss+xml" />
+    
+
       
-      <guid>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</guid>
-      <description>&lt;h2 id=&#34;契机&#34;&gt;契机&lt;/h2&gt;
+      <item>
+        <title>Replace Ubuntu on WSL with Archlinux</title>
+        <link>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</link>
+        <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+        
+        <atom:modified>Mon, 25 Jan 2021 23:36:39 +0800</atom:modified>
+        <guid>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</guid>
+        <description>&lt;h2 id=&#34;契机&#34;&gt;契机&lt;/h2&gt;
 &lt;p&gt;Windows10的WSL[Windows Subsystem for Linux]在2017秋季更新后修复了大量的BUG。不过对于WSL,之前我一直处于围观状态，嗯，作为一位狂热Linuxer，怎么能随便投身Windows呢呵呵。&lt;/p&gt;
 &lt;p&gt;在最初的时候，WSL还只有Ubuntu，到现在应用商店里提供了有Fedora、Debian、SUSE和KALI。呃&amp;hellip;等等，怎么能没有我们优秀的Archlinux呢？作为Archlinuxer第一个不服。&lt;/p&gt;</description>
-    </item>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>Archlinux</category>
+            
+          
+            
+              <category>WSL</category>
+            
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+          
+            
+              <category>折腾</category>
+            
+          
+        
+        
+      </item>
+      
+
     
   </channel>
 </rss>

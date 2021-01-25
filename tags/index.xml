@@ -1,84 +1,168 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" 
+  xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+  xmlns:dc="http://purl.org/dc/elements/1.1/" 
+  xmlns:atom="http://www.w3.org/2005/Atom" 
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" 
+  xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>Tags on 瘋魔</title>
     <link>/tags/</link>
     <description>Recent content in Tags on 瘋魔</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>zh</language>
     <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
-    <lastBuildDate>Thu, 15 Aug 2019 23:18:49 +0800</lastBuildDate><atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>罗技</title>
-      <link>/tags/%E7%BD%97%E6%8A%80/</link>
-      <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
-      
-      <guid>/tags/%E7%BD%97%E6%8A%80/</guid>
-      <description></description>
-    </item>
+    <lastBuildDate>Thu, 15 Aug 2019 23:18:49 +0800</lastBuildDate>
     
-    <item>
-      <title>Linux</title>
-      <link>/tags/linux/</link>
-      <pubDate>Tue, 09 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/linux/</guid>
-      <description></description>
-    </item>
+        <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
-    <item>
-      <title>Golang</title>
-      <link>/tags/golang/</link>
-      <pubDate>Sat, 09 Mar 2019 12:48:04 +0800</pubDate>
+
       
-      <guid>/tags/golang/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>RabbitMQ</title>
-      <link>/tags/rabbitmq/</link>
-      <pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate>
+      <item>
+        <title>罗技</title>
+        <link>/tags/%E7%BD%97%E6%8A%80/</link>
+        <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
+        
+        
+        <guid>/tags/%E7%BD%97%E6%8A%80/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
       
-      <guid>/tags/rabbitmq/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Archlinux</title>
-      <link>/tags/archlinux/</link>
-      <pubDate>Fri, 07 Dec 2018 00:00:00 +0000</pubDate>
+      <item>
+        <title>Linux</title>
+        <link>/tags/linux/</link>
+        <pubDate>Tue, 09 Apr 2019 00:00:00 +0000</pubDate>
+        
+        
+        <guid>/tags/linux/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
       
-      <guid>/tags/archlinux/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Nginx</title>
-      <link>/tags/nginx/</link>
-      <pubDate>Tue, 04 Dec 2018 00:00:00 +0000</pubDate>
+      <item>
+        <title>Golang</title>
+        <link>/tags/golang/</link>
+        <pubDate>Sat, 09 Mar 2019 12:48:04 +0800</pubDate>
+        
+        
+        <guid>/tags/golang/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
       
-      <guid>/tags/nginx/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>SSL</title>
-      <link>/tags/ssl/</link>
-      <pubDate>Tue, 04 Dec 2018 00:00:00 +0000</pubDate>
+      <item>
+        <title>RabbitMQ</title>
+        <link>/tags/rabbitmq/</link>
+        <pubDate>Sun, 03 Feb 2019 00:00:00 +0000</pubDate>
+        
+        
+        <guid>/tags/rabbitmq/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
       
-      <guid>/tags/ssl/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>WSL</title>
-      <link>/tags/wsl/</link>
-      <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+      <item>
+        <title>Archlinux</title>
+        <link>/tags/archlinux/</link>
+        <pubDate>Fri, 07 Dec 2018 00:00:00 +0000</pubDate>
+        
+        
+        <guid>/tags/archlinux/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
       
-      <guid>/tags/wsl/</guid>
-      <description></description>
-    </item>
+      <item>
+        <title>Nginx</title>
+        <link>/tags/nginx/</link>
+        <pubDate>Tue, 04 Dec 2018 00:00:00 +0000</pubDate>
+        
+        
+        <guid>/tags/nginx/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
+      
+      <item>
+        <title>SSL</title>
+        <link>/tags/ssl/</link>
+        <pubDate>Tue, 04 Dec 2018 00:00:00 +0000</pubDate>
+        
+        
+        <guid>/tags/ssl/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
+      
+      <item>
+        <title>WSL</title>
+        <link>/tags/wsl/</link>
+        <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+        
+        
+        <guid>/tags/wsl/</guid>
+        <description></description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+        
+        
+      </item>
+      
+
     
   </channel>
 </rss>

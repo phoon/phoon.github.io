@@ -1,50 +1,162 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" 
+  xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+  xmlns:dc="http://purl.org/dc/elements/1.1/" 
+  xmlns:atom="http://www.w3.org/2005/Atom" 
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" 
+  xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>Linux on 瘋魔</title>
     <link>/tags/linux/</link>
     <description>Recent content in Linux on 瘋魔</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>zh</language>
     <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
-    <lastBuildDate>Tue, 09 Apr 2019 00:00:00 +0000</lastBuildDate><atom:link href="/tags/linux/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>[译]pselect()系统调用</title>
-      <link>/post/2019/04/09/the-new-pselect-system-call/</link>
-      <pubDate>Tue, 09 Apr 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/2019/04/09/the-new-pselect-system-call/</guid>
-      <description>译自 [The new pselect() system call] https://lwn.net/Articles/176911/ 诸如网络服务器等的应用需要使用select()，poll()，或者epoll_wait()(Linux独有)等系统调用来对多</description>
-    </item>
+    <lastBuildDate>Tue, 09 Apr 2019 00:00:00 +0000</lastBuildDate>
     
-    <item>
-      <title>Linux Process Credentials</title>
-      <link>/post/2018/12/01/linux-process-credentials/</link>
-      <pubDate>Sat, 01 Dec 2018 00:00:00 +0000</pubDate>
-      
-      <guid>/post/2018/12/01/linux-process-credentials/</guid>
-      <description>Process Credentials包含一系列的ID： real user ID &amp;amp; real group ID effective user ID &amp;amp; effective group ID saved set-user-ID &amp;amp; saved set-group-ID file-system user ID &amp;amp; file-system group ID supplementary group IDs real user ID &amp;amp; real group ID real user ID和real gourp ID确</description>
-    </item>
+        <atom:link href="/tags/linux/index.xml" rel="self" type="application/rss+xml" />
     
-    <item>
-      <title>Chdir()与Chroot()</title>
-      <link>/post/2018/11/25/chdir-and-chroot/</link>
-      <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+
       
-      <guid>/post/2018/11/25/chdir-and-chroot/</guid>
-      <description>最近在学习容器时，遇到了以下几个系统调用，遂作个记录 chdir：更改工作目录 chroot：更改root目录 chdir 1 2 #include &amp;lt;unistd.h&amp;gt;int chdir(const char *path); 示例 chdir将当</description>
-    </item>
-    
-    <item>
-      <title>Replace Ubuntu on WSL with Archlinux</title>
-      <link>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</link>
-      <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+      <item>
+        <title>[译]pselect()系统调用</title>
+        <link>/post/2019/04/09/the-new-pselect-system-call/</link>
+        <pubDate>Tue, 09 Apr 2019 00:00:00 +0000</pubDate>
+        
+        <atom:modified>Mon, 25 Jan 2021 23:58:42 +0800</atom:modified>
+        <guid>/post/2019/04/09/the-new-pselect-system-call/</guid>
+        <description>译自 [The new pselect() system call] https://lwn.net/Articles/176911/ 像网络服务器等需要使用select()，poll()，或者epoll_wait()(Linux独有)等系统调用来对多个文件描</description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+      </item>
       
-      <guid>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</guid>
-      <description>&lt;h2 id=&#34;契机&#34;&gt;契机&lt;/h2&gt;
+      <item>
+        <title>Linux Process Credentials</title>
+        <link>/post/2018/12/01/linux-process-credentials/</link>
+        <pubDate>Sat, 01 Dec 2018 00:00:00 +0000</pubDate>
+        
+        <atom:modified>Mon, 25 Jan 2021 23:36:39 +0800</atom:modified>
+        <guid>/post/2018/12/01/linux-process-credentials/</guid>
+        <description>Process Credentials包含一系列的ID： real user ID &amp;amp; real group ID effective user ID &amp;amp; effective group ID saved set-user-ID &amp;amp; saved set-group-ID file-system user ID &amp;amp; file-system group ID supplementary group IDs real user ID &amp;amp; real group ID real user ID和real gourp ID确</description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+          
+            
+              <category>Linux</category>
+            
+          
+            
+              <category>后端</category>
+            
+          
+        
+        
+      </item>
+      
+      <item>
+        <title>Chdir()与Chroot()</title>
+        <link>/post/2018/11/25/chdir-and-chroot/</link>
+        <pubDate>Sun, 25 Nov 2018 00:00:00 +0000</pubDate>
+        
+        <atom:modified>Mon, 25 Jan 2021 23:36:39 +0800</atom:modified>
+        <guid>/post/2018/11/25/chdir-and-chroot/</guid>
+        <description>最近在学习容器时，遇到了以下几个系统调用，遂作个记录 chdir：更改工作目录 chroot：更改root目录 chdir 1 2 #include &amp;lt;unistd.h&amp;gt;int chdir(const char *path); 示例 chdir将当</description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+          
+            
+              <category>Linux</category>
+            
+          
+            
+              <category>后端</category>
+            
+          
+        
+        
+      </item>
+      
+      <item>
+        <title>Replace Ubuntu on WSL with Archlinux</title>
+        <link>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</link>
+        <pubDate>Mon, 18 Jun 2018 00:00:00 +0000</pubDate>
+        
+        <atom:modified>Mon, 25 Jan 2021 23:36:39 +0800</atom:modified>
+        <guid>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</guid>
+        <description>&lt;h2 id=&#34;契机&#34;&gt;契机&lt;/h2&gt;
 &lt;p&gt;Windows10的WSL[Windows Subsystem for Linux]在2017秋季更新后修复了大量的BUG。不过对于WSL,之前我一直处于围观状态，嗯，作为一位狂热Linuxer，怎么能随便投身Windows呢呵呵。&lt;/p&gt;
 &lt;p&gt;在最初的时候，WSL还只有Ubuntu，到现在应用商店里提供了有Fedora、Debian、SUSE和KALI。呃&amp;hellip;等等，怎么能没有我们优秀的Archlinux呢？作为Archlinuxer第一个不服。&lt;/p&gt;</description>
-    </item>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>Archlinux</category>
+            
+          
+            
+              <category>WSL</category>
+            
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+          
+            
+              <category>折腾</category>
+            
+          
+        
+        
+      </item>
+      
+
     
   </channel>
 </rss>

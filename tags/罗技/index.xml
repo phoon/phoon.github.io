@@ -1,21 +1,58 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" 
+  xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+  xmlns:dc="http://purl.org/dc/elements/1.1/" 
+  xmlns:atom="http://www.w3.org/2005/Atom" 
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" 
+  xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>罗技 on 瘋魔</title>
     <link>/tags/%E7%BD%97%E6%8A%80/</link>
     <description>Recent content in 罗技 on 瘋魔</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>zh</language>
     <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
-    <lastBuildDate>Thu, 15 Aug 2019 23:18:49 +0800</lastBuildDate><atom:link href="/tags/%E7%BD%97%E6%8A%80/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>解决Archlinux下蓝牙鼠标滞后感严重的问题</title>
-      <link>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</link>
-      <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
+    <lastBuildDate>Thu, 15 Aug 2019 23:18:49 +0800</lastBuildDate>
+    
+        <atom:link href="/tags/%E7%BD%97%E6%8A%80/index.xml" rel="self" type="application/rss+xml" />
+    
+
       
-      <guid>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</guid>
-      <description>契机 最近入手了Logitech MX Anywhere 2S鼠标，欣喜的在Arch中连接上蓝牙一试，瞬间傻眼&amp;hellip; 移动鼠标，指针掉帧严重，有很重的滞后感</description>
-    </item>
+      <item>
+        <title>解决Archlinux下蓝牙鼠标滞后感严重的问题</title>
+        <link>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</link>
+        <pubDate>Thu, 15 Aug 2019 23:18:49 +0800</pubDate>
+        
+        <atom:modified>Mon, 25 Jan 2021 23:36:39 +0800</atom:modified>
+        <guid>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</guid>
+        <description>契机 最近入手了Logitech MX Anywhere 2S鼠标，欣喜的在Arch中连接上蓝牙一试，瞬间傻眼&amp;hellip; 移动鼠标，指针掉帧严重，有很重的滞后感</description>
+        
+        <dc:creator>Peven Phoon</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>罗技</category>
+            
+          
+        
+        
+          
+            
+              <category>折腾</category>
+            
+          
+            
+              <category>Linux</category>
+            
+          
+        
+        
+      </item>
+      
+
     
   </channel>
 </rss>
