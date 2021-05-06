@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
     <loc>/ko/categories/</loc>
     <xhtml:link
@@ -19,9 +18,7 @@
                 hreflang="ko"
                 href="/ko/categories/"
                 />
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/ko/series/</loc>
     <xhtml:link
                 rel="alternate"
@@ -38,9 +35,7 @@
                 hreflang="ko"
                 href="/ko/series/"
                 />
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/ko/tags/</loc>
     <xhtml:link
                 rel="alternate"
@@ -57,9 +52,7 @@
                 hreflang="ko"
                 href="/ko/tags/"
                 />
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/ko/</loc>
     <xhtml:link
                 rel="alternate"
@@ -77,5 +70,4 @@
                 href="/ko/"
                 />
   </url>
-  
 </urlset>

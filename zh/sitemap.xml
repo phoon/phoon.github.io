@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
     <loc>/categories/</loc>
-    <lastmod>2021-01-25T23:58:42+08:00</lastmod>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -20,21 +19,15 @@
                 hreflang="zh"
                 href="/categories/"
                 />
-  </url>
-  
-  <url>
-    <loc>/categories/linux/</loc>
-    <lastmod>2021-01-25T23:58:42+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
+    <loc>/categories/golang/</loc>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
+  </url><url>
     <loc>/post/</loc>
-    <lastmod>2021-01-25T23:58:42+08:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
+  </url><url>
     <loc>/tags/</loc>
-    <lastmod>2021-01-25T23:58:42+08:00</lastmod>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -50,124 +43,85 @@
                 hreflang="zh"
                 href="/tags/"
                 />
-  </url>
-  
-  <url>
+  </url><url>
+    <loc>/categories/%E7%AE%97%E6%B3%95/</loc>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
+  </url><url>
+    <loc>/tags/%E7%BA%A2%E9%BB%91%E6%A0%91/</loc>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
+  </url><url>
+    <loc>/post/2021/05/06/the_red_black_tree/</loc>
+    <lastmod>2021-05-06T16:49:16+08:00</lastmod>
+  </url><url>
+    <loc>/categories/linux/</loc>
+    <lastmod>2021-01-25T23:58:42+08:00</lastmod>
+  </url><url>
     <loc>/categories/%E6%8A%98%E8%85%BE/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/%E7%BD%97%E6%8A%80/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2019/04/09/the-new-pselect-system-call/</loc>
     <lastmod>2021-01-25T23:58:42+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/linux/</loc>
     <lastmod>2021-01-25T23:58:42+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/golang/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/golang/</loc>
-    <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/categories/%E5%90%8E%E7%AB%AF/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2019/03/09/working-with-mysql-in-golang/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/rabbitmq/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2019/02/03/learn-rabbitmq-with-golang/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2019/02/01/golang-range-pointer-problem/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/archlinux/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2018/12/07/replace-server-os-with-archlinux/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/nginx/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/ssl/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2018/12/04/free-ssl-with-certbot/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2018/12/01/linux-process-credentials/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2018/11/25/chdir-and-chroot/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/tags/wsl/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/about/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/friends/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/</loc>
     <lastmod>2021-01-25T23:36:39+08:00</lastmod>
     <xhtml:link
@@ -185,9 +139,7 @@
                 hreflang="zh"
                 href="/"
                 />
-  </url>
-  
-  <url>
+  </url><url>
     <loc>/series/</loc>
     <xhtml:link
                 rel="alternate"
@@ -205,5 +157,4 @@
                 href="/series/"
                 />
   </url>
-  
 </urlset>
