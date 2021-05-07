@@ -12,45 +12,11 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh</language>
     <copyright>&amp;copy;{year}, All Rights Reserved</copyright>
-    <lastBuildDate>Thu, 06 May 2021 16:41:57 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 09 Mar 2019 12:48:04 +0800</lastBuildDate>
     
         <atom:link href="/categories/golang/index.xml" rel="self" type="application/rss+xml" />
     
 
-      
-      <item>
-        <title>红黑树那点事儿</title>
-        <link>/post/2021/05/06/the_red_black_tree/</link>
-        <pubDate>Thu, 06 May 2021 16:41:57 +0800</pubDate>
-        
-        <atom:modified>Thu, 06 May 2021 16:49:16 +0800</atom:modified>
-        <guid>/post/2021/05/06/the_red_black_tree/</guid>
-        <description>红黑树那点事儿 前置知识：二叉查找树、B树，本文不多做介绍。 0. 写在前面 在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予</description>
-        
-        <dc:creator>Peven Phoon</dc:creator>
-        
-        
-        
-        
-          
-            
-              <category>红黑树</category>
-            
-          
-        
-        
-          
-            
-              <category>Golang</category>
-            
-          
-            
-              <category>算法</category>
-            
-          
-        
-        
-      </item>
       
       <item>
         <title>在Golang中对MySQL进行操作</title>
