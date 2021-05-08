@@ -1331,7 +1331,7 @@
 <meta name="keywords" content="红黑树">
 
 <meta name="created" content="2021-05-08T16:41:57&#43;0800">
-<meta name="modified" content="2021-05-08T23:55:44&#43;0800">
+<meta name="modified" content="2021-05-09T00:04:45&#43;0800">
 <meta property="article:published_time" content="2021-05-08T16:41:57&#43;0800">
 
 <meta name="author" content="Peven Phoon">
@@ -1380,7 +1380,7 @@
     "@type": "BlogPosting",
     "headline": "红黑树那点事儿",
     "datePublished": "2021-05-08T16:41:57+08:00",
-    "dateModified": "2021-05-08T23:55:44+08:00",
+    "dateModified": "2021-05-09T00:04:45+08:00",
     "url" : "/post/2021/05/08/the-red-black-tree/",
     "description": "红黑树那点事儿 前置知识：二叉查找树、B树，本文不多做介绍。 0. 写在前面 在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予",
     "keywords": ["红黑树"],
@@ -1672,7 +1672,9 @@
 <div class="single__infos">
   <time class="single__info" title="创建日期">📅&nbsp;2021年05月08日 </time>
   
-  &nbsp;&middot;&nbsp; <span class="single__info" title="阅读时长"> ☕&nbsp;9&nbsp;分钟 </span>
+  &nbsp;&middot;&nbsp; <time class="single__info" title="更新日期"> 📝&nbsp;2021年05月09日 </time>
+  
+  &nbsp;&middot;&nbsp; <span class="single__info" title="阅读时长"> ☕&nbsp;10&nbsp;分钟 </span>
   
   <span class="single__info">
     
@@ -1700,7 +1702,7 @@
 <p>在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予红黑树的一切行为，都是为了使其能够保持平衡性。</p>
 <p>红黑树是由<code>2-3-4树</code>（4阶B树）等价过来的（当然也有由<code>2-3树</code>等价来的左倾或右倾红黑树），而这层等价关系，是我们用以维持红黑树平衡性的根本。</p>
 <p><img src="https://i.loli.net/2021/05/06/h6DA5UabVoznLRC.jpg" alt="等价关系.jpeg" /></p>
-<p>在红黑树中，我们以黑色来标识对应B树里的<code>2-结点</code>，而红色结点表示其父亲到自己的链接是一条红链接（向上融合后对应B树中的<code>3-结点</code>，若兄弟结点也是红色则一起向上融合对应<code>4-结点</code>）</p>
+<p>在红黑树中，我们以黑色来标识对应B树里的<code>2-结点</code>，而红色结点表示其<code>parent</code>到自己的链接是一条红链接（向上融合后对应B树中的<code>3-结点</code>，若兄弟结点也是红色则一起向上融合对应<code>4-结点</code>）</p>
 <p>接下来我们来看看红黑树的五大性质：</p>
 <ul>
 <li>结点为红色或黑色</li>
@@ -1733,7 +1735,7 @@
 <p>如果新增的<code>2-结点</code>将作为根节点，则将其进一步标为黑色。</p>
 <h4 id="b-与一个2-结点合并成为3-结点">b. 与一个2-结点合并成为3-结点</h4>
 <p><img src="https://i.loli.net/2021/05/06/JFkmLxbgrQTlit8.jpg" alt="3node.jpeg" /></p>
-<p>即新结点的父亲结点为黑色，无需调整。</p>
+<p>即新结点的<code>parent</code>结点为黑色，无需调整。</p>
 <h4 id="c-与一个3-结点合并成为4-结点">c. 与一个3-结点合并成为4-结点</h4>
 <p><img src="https://i.loli.net/2021/05/06/bJQ1nCwpxGOEVHI.jpg" alt="4node.jpeg" /></p>
 <ul>
@@ -1762,12 +1764,12 @@
 <h4 id="a-兄弟够借">a. 兄弟够借</h4>
 <p>向兄弟结点借之前得先知道兄弟手里够不够吧，所以需要找到真正的兄弟结点，因为若当前替代结点的兄弟是红色结点的话，对应2-3-4树，在红黑树中根本不是真正的兄弟结点。如下图第二种情况（图中<code>p</code>表示<code>parent结点</code>哦）：</p>
 <p><img src="https://i.loli.net/2021/05/06/ovUeGrXcxKSFwu5.jpg" alt="5node.jpeg" /></p>
-<p>这时我们只需对替代结点的父亲结点做一次旋转操作即可（出现红链接了）,如下所示：</p>
+<p>这时我们只需对替代结点的<code>parent</code>结点做一次旋转操作即可（出现红链接了）,如下所示：</p>
 <p><img src="https://i.loli.net/2021/05/06/jgHPDvSGsUh86Ip.jpg" alt="5node.jpeg" /></p>
 <p>找到真正的兄弟结点之后，如果兄弟结点的孩子中有红色结点，就对应了<code>2-3-4树</code>中非<code>2-结点</code>可借的情况。</p>
-<p>既然兄弟够借，那么对应<code>2-3-4树</code>中，就是兄弟中<code>KEY</code>最接近自己的上去顶替父亲，父亲下来顶替被删的结点。</p>
-<p>为了实现起来简单，这里有一个小trick：通过旋转将兄弟与兄弟孩子结点达到某种关系后，再旋转父亲结点。这样做可以达到在对应<code>2-3-4树</code>中如果有兄弟有两个孩子就从兄弟那里借两个来的效果，而且可以大大的简化我们的代码。</p>
-<p>例如被删结点是其<code>parent</code>的左孩子，找到其真正的右兄弟后，如果右兄弟有两个红色子节点，直接旋转父亲，这样，兄弟结点中只会留下右孩子（较大的<code>KEY</code>），兄弟结点上升代替<code>parent</code>，<code>parent</code>与兄弟左孩子下来代替删除的结点，左孩子没有的话也没关系；另一种需要提前调整的情况是，右兄弟只有一个左孩子可借，这时候我们对右兄弟进行右旋后再对<code>parent</code>进行左旋即可。</p>
+<p>既然兄弟够借，那么对应<code>2-3-4树</code>中，就是兄弟中<code>KEY</code>最接近自己的上去顶替<code>parent</code>，<code>parent</code>下来顶替被删的结点。</p>
+<p>为了实现起来简单，这里有一个小trick：通过旋转将兄弟与兄弟孩子结点达到某种关系后，再旋转<code>parent</code>结点。这样做可以达到在对应<code>2-3-4树</code>中如果有兄弟有两个孩子就从兄弟那里借两个来的效果，而且可以大大的简化我们的代码。</p>
+<p>例如被删结点是其<code>parent</code>的左孩子，找到其真正的右兄弟后，如果右兄弟有两个红色子节点，直接旋转<code>parent</code>，这样，兄弟结点中只会留下右孩子（较大的<code>KEY</code>），兄弟结点上升代替<code>parent</code>，<code>parent</code>与兄弟左孩子下来代替删除的结点，左孩子没有的话也没关系；另一种需要提前调整的情况是，右兄弟只有一个左孩子可借，这时候我们对右兄弟进行右旋后再对<code>parent</code>进行左旋即可。</p>
 <p>然而我们前面说：旋转操作是针对红链接的。然而我们在这里其实很幸运地跳出了这个规则的束缚,只需做小许额外的步骤：</p>
 <ul>
 <li>
@@ -1783,7 +1785,7 @@
 <p>若被删结点是其<code>parent</code>的右孩子，把上面的逻辑反过来左右对调即可。</p>
 <p>如果真兄弟结点的两个孩子均为黑色，就对应了<code>2-结点</code>、不可借的情况，我们将在下面继续进行讨论。</p>
 <h4 id="b-兄弟不够">b. 兄弟不够</h4>
-<p>兄弟无法借过来，对应<code>2-3-4树</code>中，兄弟就得找<code>parent</code>合并。所以直接将兄弟结点变成红色，交由上层解决。若<code>parent</code>也是红色，就把父亲变成黑色。若<code>parent</code>本身就是黑色，就得让<code>parent</code>找他自己的兄弟结点借。</p>
+<p>兄弟无法借过来，对应<code>2-3-4树</code>中，兄弟就得找<code>parent</code>合并。所以直接将兄弟结点变成红色，交由上层解决。若<code>parent</code>也是红色，就把<code>parent</code>变成黑色。若<code>parent</code>本身就是黑色，就得让<code>parent</code>找他自己的兄弟结点借。</p>
 <p><img src="https://i.loli.net/2021/05/08/ElLRvKUJpHVMZmk.jpg" alt="5node.jpeg" /></p>
 <h2 id="3-代码实现">3. 代码实现</h2>
 <div class="highlight"><div class="chroma">
@@ -3969,14 +3971,14 @@ document.addEventListener('DOMContentLoaded', function () {
       
       
         
-      
-        
         
           
             
               <a href="/post/2021/05/08/the-red-black-tree/" data-lang="zh" class="dropdown-item is-active">中文</a>
             
           
+        
+      
         
       
         
