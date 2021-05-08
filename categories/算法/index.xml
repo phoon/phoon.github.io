@@ -23,7 +23,7 @@
         <link>/post/2021/05/08/the-red-black-tree/</link>
         <pubDate>Sat, 08 May 2021 16:41:57 +0800</pubDate>
         
-        <atom:modified>Sun, 09 May 2021 00:04:45 +0800</atom:modified>
+        <atom:modified>Sun, 09 May 2021 00:35:38 +0800</atom:modified>
         <guid>/post/2021/05/08/the-red-black-tree/</guid>
         <description>红黑树那点事儿 前置知识：二叉查找树、B树，本文不多做介绍。 0. 写在前面 在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予</description>
         

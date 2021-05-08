@@ -1331,7 +1331,7 @@
 <meta name="keywords" content="红黑树">
 
 <meta name="created" content="2021-05-08T16:41:57&#43;0800">
-<meta name="modified" content="2021-05-09T00:04:45&#43;0800">
+<meta name="modified" content="2021-05-09T00:35:38&#43;0800">
 <meta property="article:published_time" content="2021-05-08T16:41:57&#43;0800">
 
 <meta name="author" content="Peven Phoon">
@@ -1380,7 +1380,7 @@
     "@type": "BlogPosting",
     "headline": "红黑树那点事儿",
     "datePublished": "2021-05-08T16:41:57+08:00",
-    "dateModified": "2021-05-09T00:04:45+08:00",
+    "dateModified": "2021-05-09T00:35:38+08:00",
     "url" : "/post/2021/05/08/the-red-black-tree/",
     "description": "红黑树那点事儿 前置知识：二叉查找树、B树，本文不多做介绍。 0. 写在前面 在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予",
     "keywords": ["红黑树"],
@@ -1744,7 +1744,7 @@
 </ul>
 <p>可能会出现连续两条红链接的情况，这时需要通过旋转操作进行调整（为上图下半部分的形式）。</p>
 <h4 id="d-与一个4-结点进行合并-4-结点需要分裂颜色翻转">d. 与一个4-结点进行合并， 4-结点需要分裂（颜色翻转）</h4>
-<p><img src="https://i.loli.net/2021/05/06/jwYiLDSHAP2huCB.jpg" alt="5node.jpeg" /></p>
+<p><img src="https://i.loli.net/2021/05/06/jwYiLDSHAP2huCB.jpg" alt="4node-split.jpeg" /></p>
 <h3 id="-删除后的平衡性维持">Ⅱ. 删除后的平衡性维持</h3>
 <p>删除操作同<code>BST</code>大体相同，不过在我们的代码实现里，被删除的永远是一个替代结点。因为红黑树由2-3-4树等价而来，我们要充分对其性质进行利用。</p>
 <p>那么替代结点究竟如何得到呢？我们先查找到指定删除的结点<code>d</code>，如果该结点有两个孩子，则替代结点为其前驱或后继结点；如果该结点只有一个孩子，该孩子就是替代结点；若<code>d</code>没有孩子（即<code>d</code>为根结点），则替代结点就是其本身。</p>
@@ -1763,9 +1763,9 @@
 <p>接下来讨论上述第二种情况：需要平衡修复的情况。</p>
 <h4 id="a-兄弟够借">a. 兄弟够借</h4>
 <p>向兄弟结点借之前得先知道兄弟手里够不够吧，所以需要找到真正的兄弟结点，因为若当前替代结点的兄弟是红色结点的话，对应2-3-4树，在红黑树中根本不是真正的兄弟结点。如下图第二种情况（图中<code>p</code>表示<code>parent结点</code>哦）：</p>
-<p><img src="https://i.loli.net/2021/05/06/ovUeGrXcxKSFwu5.jpg" alt="5node.jpeg" /></p>
+<p><img src="https://i.loli.net/2021/05/06/ovUeGrXcxKSFwu5.jpg" alt="find-bro.jpeg" /></p>
 <p>这时我们只需对替代结点的<code>parent</code>结点做一次旋转操作即可（出现红链接了）,如下所示：</p>
-<p><img src="https://i.loli.net/2021/05/06/jgHPDvSGsUh86Ip.jpg" alt="5node.jpeg" /></p>
+<p><img src="https://i.loli.net/2021/05/06/jgHPDvSGsUh86Ip.jpg" alt="find-real-bro.jpeg" /></p>
 <p>找到真正的兄弟结点之后，如果兄弟结点的孩子中有红色结点，就对应了<code>2-3-4树</code>中非<code>2-结点</code>可借的情况。</p>
 <p>既然兄弟够借，那么对应<code>2-3-4树</code>中，就是兄弟中<code>KEY</code>最接近自己的上去顶替<code>parent</code>，<code>parent</code>下来顶替被删的结点。</p>
 <p>为了实现起来简单，这里有一个小trick：通过旋转将兄弟与兄弟孩子结点达到某种关系后，再旋转<code>parent</code>结点。这样做可以达到在对应<code>2-3-4树</code>中如果有兄弟有两个孩子就从兄弟那里借两个来的效果，而且可以大大的简化我们的代码。</p>
@@ -1786,7 +1786,7 @@
 <p>如果真兄弟结点的两个孩子均为黑色，就对应了<code>2-结点</code>、不可借的情况，我们将在下面继续进行讨论。</p>
 <h4 id="b-兄弟不够">b. 兄弟不够</h4>
 <p>兄弟无法借过来，对应<code>2-3-4树</code>中，兄弟就得找<code>parent</code>合并。所以直接将兄弟结点变成红色，交由上层解决。若<code>parent</code>也是红色，就把<code>parent</code>变成黑色。若<code>parent</code>本身就是黑色，就得让<code>parent</code>找他自己的兄弟结点借。</p>
-<p><img src="https://i.loli.net/2021/05/08/ElLRvKUJpHVMZmk.jpg" alt="5node.jpeg" /></p>
+<p><img src="https://i.loli.net/2021/05/08/ElLRvKUJpHVMZmk.jpg" alt="Delete.jpeg" /></p>
 <h2 id="3-代码实现">3. 代码实现</h2>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
