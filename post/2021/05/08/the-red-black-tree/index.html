@@ -1331,7 +1331,7 @@
 <meta name="keywords" content="红黑树">
 
 <meta name="created" content="2021-05-08T16:41:57&#43;0800">
-<meta name="modified" content="2021-05-09T00:35:38&#43;0800">
+<meta name="modified" content="2021-05-09T10:18:20&#43;0800">
 <meta property="article:published_time" content="2021-05-08T16:41:57&#43;0800">
 
 <meta name="author" content="Peven Phoon">
@@ -1380,9 +1380,9 @@
     "@type": "BlogPosting",
     "headline": "红黑树那点事儿",
     "datePublished": "2021-05-08T16:41:57+08:00",
-    "dateModified": "2021-05-09T00:35:38+08:00",
+    "dateModified": "2021-05-09T10:18:20+08:00",
     "url" : "/post/2021/05/08/the-red-black-tree/",
-    "description": "红黑树那点事儿 前置知识：二叉查找树、B树，本文不多做介绍。 0. 写在前面 在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予",
+    "description": "前置知识：二叉查找树、B树，本文不多做介绍。 0. 写在前面 在观察和思考红黑树时，一定要牢记：红黑树是一颗平衡二叉查找树，我们所赋予红黑树的一切行",
     "keywords": ["红黑树"],
     "mainEntityOfPage": {
       "@type": "WebPage",
@@ -1694,8 +1694,7 @@
     </div>
     <article class="single__contents" data-dir="ltr" data-ani="true">
       
-      <h1 id="红黑树那点事儿">红黑树那点事儿</h1>
-<blockquote>
+      <blockquote>
 <p>前置知识：二叉查找树、B树，本文不多做介绍。</p>
 </blockquote>
 <h2 id="0-写在前面">0. 写在前面</h2>
@@ -1785,7 +1784,7 @@
 <p>若被删结点是其<code>parent</code>的右孩子，把上面的逻辑反过来左右对调即可。</p>
 <p>如果真兄弟结点的两个孩子均为黑色，就对应了<code>2-结点</code>、不可借的情况，我们将在下面继续进行讨论。</p>
 <h4 id="b-兄弟不够">b. 兄弟不够</h4>
-<p>兄弟无法借过来，对应<code>2-3-4树</code>中，兄弟就得找<code>parent</code>合并。所以直接将兄弟结点变成红色，交由上层解决。若<code>parent</code>也是红色，就把<code>parent</code>变成黑色。若<code>parent</code>本身就是黑色，就得让<code>parent</code>找他自己的兄弟结点借。</p>
+<p>兄弟无法借过来，对应<code>2-3-4树</code>中，兄弟就得找<code>parent</code>合并。所以直接将兄弟结点变成红色，交由上层解决。若<code>parent</code>也是红色，就把<code>parent</code>变成黑色。若<code>parent</code>本身就是黑色，就得让<code>parent</code>再找他自己的兄弟结点借。</p>
 <p><img src="https://i.loli.net/2021/05/08/ElLRvKUJpHVMZmk.jpg" alt="Delete.jpeg" /></p>
 <h2 id="3-代码实现">3. 代码实现</h2>
 <div class="highlight"><div class="chroma">
@@ -2631,7 +2630,7 @@
 </div><p>调用生成<code>rbt.svg</code>：</p>
 <p><img src="https://i.loli.net/2021/05/06/Pe5RWiYyrMhl1Gj.png" alt="rbt.png" /></p>
 <h2 id="5-总结">5. 总结</h2>
-<p>本文沿着<code>2-3-4树</code>与红黑树的关系脉络来讨论了红黑树里的插入及删除操作，其可能涉及的情况十分繁多，本文亦不能做到面面俱到。手绘的图也只展示了部分情况，通过简单的梳理来力图理解红黑树平衡性的本质。假如如果你此前对于<code>B树</code>已有很深入的理解的话，相信理解红黑树也不会花费太多时间。</p>
+<p>本文沿着红黑树同<code>2-3-4树</code>的关系脉络来讨论了红黑树里的插入及删除操作，其可能涉及的情况十分繁多，本文亦不能做到面面俱到。手绘的图也只展示了部分情况，力图通过简单的梳理来理解红黑树平衡性的本质。假如如果你此前对于<code>B树</code>已有很深入的理解的话，相信理解红黑树也不会花费太多时间。</p>
 
     </article>
     
@@ -3971,14 +3970,14 @@ document.addEventListener('DOMContentLoaded', function () {
       
       
         
+      
+        
         
           
             
               <a href="/post/2021/05/08/the-red-black-tree/" data-lang="zh" class="dropdown-item is-active">中文</a>
             
           
-        
-      
         
       
         
