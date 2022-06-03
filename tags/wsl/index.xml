@@ -1,0 +1,17 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>WSL - 标签 - 瘋魔</title>
+        <link>https://blog.peven.me/tags/wsl/</link>
+        <description>WSL - 标签 - 瘋魔</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 18 Jun 2018 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://blog.peven.me/tags/wsl/" rel="self" type="application/rss+xml" /><item>
+    <title>Replace Ubuntu on WSL with Archlinux</title>
+    <link>https://blog.peven.me/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</link>
+    <pubDate>Mon, 18 Jun 2018 00:00:00 &#43;0000</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2018/06/18/replace-ubuntu-on-wsl-with-archlinux/</guid>
+    <description><![CDATA[<h2 id="契机">契机</h2>
+<p>Windows10的WSL[Windows Subsystem for Linux]在2017秋季更新后修复了大量的BUG。不过对于WSL,之前我一直处于围观状态，嗯，作为一位狂热Linuxer，怎么能随便投身Windows呢呵呵。</p>
+<p>在最初的时候，WSL还只有Ubuntu，到现在应用商店里提供了有Fedora、Debian、SUSE和KALI。呃&hellip;等等，怎么能没有我们优秀的Archlinux呢？作为Archlinuxer第一个不服。</p>]]></description>
+</item>
+</channel>
+</rss>

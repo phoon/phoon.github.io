@@ -1,0 +1,47 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>后端 - 分类 - 瘋魔</title>
+        <link>https://blog.peven.me/categories/%E5%90%8E%E7%AB%AF/</link>
+        <description>后端 - 分类 - 瘋魔</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Wed, 06 Oct 2021 11:42:28 &#43;0800</lastBuildDate><atom:link href="https://blog.peven.me/categories/%E5%90%8E%E7%AB%AF/" rel="self" type="application/rss+xml" /><item>
+    <title>InnoDB Doublewrite机制</title>
+    <link>https://blog.peven.me/post/2021/10/06/innodb-doublewrite/</link>
+    <pubDate>Wed, 06 Oct 2021 11:42:28 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://blog.peven.me/post/2021/10/06/innodb-doublewrite/</guid>
+    <description><![CDATA[楔子 最近再次翻看《InnoDB存储引擎》，看到Doublewrite时，直觉告诉我这玩意儿应该很简单（其实确实是），但总感觉书上的文字表达不]]></description>
+</item>
+<item>
+    <title>在Golang中对MySQL进行操作</title>
+    <link>https://blog.peven.me/post/2019/03/09/working-with-mysql-in-golang/</link>
+    <pubDate>Sat, 09 Mar 2019 12:48:04 &#43;0800</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2019/03/09/working-with-mysql-in-golang/</guid>
+    <description><![CDATA[Golang官方并没有提供数据库驱动，但通过database/sql/driver包来提供了实现驱动的标准接口。可以在Github上找到很多]]></description>
+</item>
+<item>
+    <title>RabbitMQ初涉以及Golang实践</title>
+    <link>https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/</link>
+    <pubDate>Sun, 03 Feb 2019 00:00:00 &#43;0000</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/</guid>
+    <description><![CDATA[在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取]]></description>
+</item>
+<item>
+    <title>Linux Process Credentials</title>
+    <link>https://blog.peven.me/post/2018/12/01/linux-process-credentials/</link>
+    <pubDate>Sat, 01 Dec 2018 00:00:00 &#43;0000</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2018/12/01/linux-process-credentials/</guid>
+    <description><![CDATA[Process Credentials包含一系列的ID： real user ID &amp; real group ID effective user ID &amp; effective group ID saved set-user-ID &amp; saved set-group-ID file-system user ID &amp; file-system group ID supplementary group IDs real user ID &amp; real group ID real user ID和real gourp ID确]]></description>
+</item>
+<item>
+    <title>Chdir()与Chroot()</title>
+    <link>https://blog.peven.me/post/2018/11/25/chdir-and-chroot/</link>
+    <pubDate>Sun, 25 Nov 2018 00:00:00 &#43;0000</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2018/11/25/chdir-and-chroot/</guid>
+    <description><![CDATA[最近在学习容器时，遇到了以下几个系统调用，遂作个记录 chdir：更改工作目录 chroot：更改root目录 chdir 1#include &lt;unistd.h&gt;2int chdir(const char *path); 示例 chdir将当前目]]></description>
+</item>
+</channel>
+</rss>

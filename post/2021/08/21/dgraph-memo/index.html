@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Dgraph备忘录 - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="Dgraph备忘录" />
+<meta property="og:description" content="不定时补充更新 部署 1docker pull dgraph/dgraph 2# HOSTIPADDR=10.0.0.10 # 用以后续告知raft模块通信地址,确保集群连通性, 我这儿后面直接写了 3cd .. 4mkdir -p Dgraph 5# 创建服务用户 6groupadd dgraph 7useradd -M -g dgraph -s /usr/sbin/nologin dgraph" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.peven.me/post/2021/08/21/dgraph-memo/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-21T15:18:47+08:00" />
+<meta property="article:modified_time" content="2021-08-27T09:10:19+08:00" /><meta property="og:site_name" content="My cool site" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
+
+<meta name="twitter:title" content="Dgraph备忘录"/>
+<meta name="twitter:description" content="不定时补充更新 部署 1docker pull dgraph/dgraph 2# HOSTIPADDR=10.0.0.10 # 用以后续告知raft模块通信地址,确保集群连通性, 我这儿后面直接写了 3cd .. 4mkdir -p Dgraph 5# 创建服务用户 6groupadd dgraph 7useradd -M -g dgraph -s /usr/sbin/nologin dgraph"/>
+<meta name="application-name" content="瘋魔">
+<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2021/08/21/dgraph-memo/" /><link rel="prev" href="https://blog.peven.me/post/2021/05/08/the-red-black-tree/" /><link rel="next" href="https://blog.peven.me/post/2021/09/04/raft-in-breif/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.zhimg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://unpkg.zhimg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.zhimg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://unpkg.zhimg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Dgraph备忘录",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/blog.peven.me\/post\/2021\/08\/21\/dgraph-memo\/"
+        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "dgraph","wordcount":  1781 ,
+        "url": "https:\/\/blog.peven.me\/post\/2021\/08\/21\/dgraph-memo\/","datePublished": "2021-08-21T15:18:47+08:00","dateModified": "2021-08-27T09:10:19+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
+                "@type": "Person",
+                "name": "Peven"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="瘋魔"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="/title.png"
+        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
+        data-sizes="auto"
+        alt="/title.png"
+        title="/title.png" /></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2021/08/21/dgraph-memo/" selected>简体中文</option></select>
+                    </a><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="瘋魔"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="/title.png"
+        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
+        data-sizes="auto"
+        alt="/title.png"
+        title="/title.png" /></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
+                    <select class="language-select" onchange="location = this.value;"><option value="/post/2021/08/21/dgraph-memo/" selected>简体中文</option></select>
+                </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Dgraph备忘录</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/%E6%8A%98%E8%85%BE/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>折腾</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2021-08-21">2021-08-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 1781 字&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 4 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#部署">部署</a></li>
+    <li><a href="#triples">Triples</a></li>
+    <li><a href="#blank-uid">Blank UID</a></li>
+    <li><a href="#schema里的">Schema里的&lt;&gt;</a></li>
+    <li><a href="#expand-a-type">Expand a type</a></li>
+    <li><a href="#reverse-edges">Reverse edges</a></li>
+    <li><a href="#password-type">Password type</a></li>
+    <li><a href="#upsert">@upsert</a></li>
+    <li><a href="#graphql--dql">GraphQL &amp; DQL</a></li>
+    <li><a href="#数据存储">数据存储</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><blockquote>
+<p>不定时补充更新</p>
+</blockquote>
+<h2 id="部署">部署</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="ln"> 1</span><span class="cl">docker pull dgraph/dgraph
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="c1"># HOSTIPADDR=10.0.0.10 # 用以后续告知raft模块通信地址,确保集群连通性, 我这儿后面直接写了</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nb">cd</span> ..
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">mkdir -p Dgraph
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="c1"># 创建服务用户</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">groupadd dgraph
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">useradd -M -g dgraph -s /usr/sbin/nologin dgraph
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">chown -R dgraph:dgraph Dgraph
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="c1"># 生成TLS证书</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="c1"># client证书用于mtls, SAN(Subject Alternative Name) 取决于访问时需要用到的标识(localhost, 公网IP...)</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">docker run --rm -v ~/Dgraph:/dgraph dgraph/dgraph:latest dgraph cert -n <span class="nv">$SAN</span> -c zero1
+</span></span><span class="line"><span class="ln">12</span><span class="cl">docker run --rm -v ~/Dgraph:/dgraph dgraph/dgraph:latest dgraph cert -c alpha1
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="c1"># zero</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">docker run -d --name dgraph-zero-1 --network dgraph_default -p 6080:6080 -p 5080:5080 -v ~/Dgraph:/dgraph dgraph/dgraph:latest dgraph zero --my<span class="o">=</span>10.0.0.10:5080 --tls <span class="s2">&#34;ca-cert=/dgraph/tls/ca.crt;client-auth-type=REQUIREANDVERIFY;server-cert=/dgraph/tls/node.crt;server-key=/dgraph/tls/node.key;internal-port=true;client-cert=/dgraph/tls/client.zero1.crt;client-key=/dgraph/tls/client.zero1.key&#34;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="c1"># alpha</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">docker run -d --name dgraph-alpha1 --network dgraph_default -p 7080:7080 -p 9080:9080 -p 8080:8080 -v ~/Dgraph:/dgraph dgraph/dgraph:latest dgraph alpha --zero<span class="o">=</span>10.0.0.10:5080 --my<span class="o">=</span>10.0.0.10:7080 --badger <span class="s2">&#34;compression=zstd:1&#34;</span> --security <span class="s2">&#34;whitelist=0.0.0.0/0&#34;</span> --tls <span class="s2">&#34;ca-cert=/dgraph/tls/ca.crt;client-auth-type=REQUIREANDVERIFY;server-cert=/dgraph/tls/node.crt;server-key=/dgraph/tls/node.key;internal-port=true;client-cert=/dgraph/tls/client.alpha1.crt;client-key=/dgraph/tls/client.alpha1.key&#34;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="c1"># 给浏览器签发证书(自己导入ca.crt和.p12文件)</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="c1"># 同样的,可以给需要连接的客户端签发证书</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">docker run --rm -v ~/Dgraph:/dgraph dgraph/dgraph:latest dgraph cert -c browser
+</span></span><span class="line"><span class="ln">20</span><span class="cl">openssl pkcs12 -export -out Dgraph/browser.p12 -in Dgraph/tls/client.browser.crt -inkey Dgraph/tls/client.browser.key
+</span></span></code></pre></div><p>端口占用情况:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Dgraph Node Type</th>
+<th style="text-align:center">gRPC-internal-private</th>
+<th style="text-align:center">gRPC-external-private</th>
+<th style="text-align:center">gRPC-external-public</th>
+<th style="text-align:center">HTTP-external-private</th>
+<th style="text-align:center">HTTP-external-public</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">zero</td>
+<td style="text-align:center">5080</td>
+<td style="text-align:center">5080</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">6080</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">alpha</td>
+<td style="text-align:center">7080</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">9080</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">8080</td>
+</tr>
+<tr>
+<td style="text-align:center">ratel</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center">8000</td>
+</tr>
+</tbody>
+</table>
+<h2 id="triples">Triples</h2>
+<p><code>Dgraph</code>采用的图数据模型是<code>Triples</code>(三元组), 也即<code>S P O</code>, 展开表示为: <code>&lt;Subject&gt; &lt;Predicate&gt; &lt;Object&gt;</code>.</p>
+<p>也即图中由<code>subject</code>标识的节点通过有向边<code>predicate</code>连接到<code>object</code>.</p>
+<p>同时借助<a href="https://www.w3.org/RDF/" target="_blank" rel="noopener noreffer">RDF</a>(资源描述框架, 基于语义网的知识表示框架)来增强其数据关联性.</p>
+<h2 id="blank-uid">Blank UID</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">{
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	set {
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">		_:alice &lt;name&gt; &#34;Alice&#34; .
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">		_:bob &lt;name&gt; &#34;Bob&#34;
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">		_:bob &lt;follows&gt; _:alice .
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">		# assign type
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">		_:alice &lt;dgraph.type&gt; &#34;Person&#34; .
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    	_:bob &lt;dgraph.type&gt; &#34;Person&#34; .
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">	}
+</span></span><span class="line"><span class="ln">10</span><span class="cl">}
+</span></span></code></pre></div><p><code>_:alice</code> 并不是真正的<code>uid</code>, 其在这里就是一个<code>uid</code>的<code>placeholder</code>(数据还未真正创建), 可以在<code>set</code> 阶段去引用某对象的<code>uid</code>.</p>
+<h2 id="schema里的">Schema里的&lt;&gt;</h2>
+<p>简单来说, 如果你的<code>predicate</code>名并不是由数字及字母组成, 在执行<code>mutation</code>时就需要用<code>&lt;&gt;</code>括起来.</p>
+<blockquote>
+<p>If your predicate is a URI or has language-specific characters, then enclose it with angle brackets <code>&lt;&gt;</code> when executing the schema mutation.</p>
+</blockquote>
+<h2 id="expand-a-type">Expand a type</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">{
+</span></span><span class="line"><span class="ln">2</span><span class="cl">	data(func: type(Person)) {
+</span></span><span class="line"><span class="ln">3</span><span class="cl">		expand(_all_) {
+</span></span><span class="line"><span class="ln">4</span><span class="cl">			expand(_all_)
+</span></span><span class="line"><span class="ln">5</span><span class="cl">		}
+</span></span><span class="line"><span class="ln">6</span><span class="cl">	}
+</span></span><span class="line"><span class="ln">7</span><span class="cl">}
+</span></span></code></pre></div><p>通过指定<code>type</code>函数参数为某<code>type</code>, 会自动展开结果中该<code>type</code>的字段(<code>predicate</code>).</p>
+<h2 id="reverse-edges">Reverse edges</h2>
+<p>在<code>predicate</code>定义里加上<code>@reverse</code>, 可通过<code>~</code>来取反.</p>
+<h2 id="password-type">Password type</h2>
+<p><code>Dgraph</code>提供了<code>password</code>类型, 表现为加密后的<code>string</code>, 其实是使用<code>bcrypt</code>加密生成的密文(60字节).</p>
+<h2 id="upsert">@upsert</h2>
+<p>给<code>predicate</code>添加此<code>directive</code>, 以使提交事务时<code>Dgraph</code>可以检查索引是否有冲突, 从而达到<code>unique index</code>的效果.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">&lt;email&gt;: string @index(hash) @upsert .
+</span></span></code></pre></div><p>使用<code>upsert block</code>:</p>
+<ul>
+<li>发起一个新事务</li>
+<li>先<code>query</code>, 如果成功返回了<code>uid</code>则说明该结点已经存在, 反则说明不存在</li>
+<li>若不存在, 则会创建新结点(紧接着的<code>mutation</code>)</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">upsert {
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  query {
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    q(func: eq(email, &#34;user@company1.io&#34;)) {
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">      v as uid
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">      name
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    }
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  }
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">  mutation {
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    set { # 若uid有值
+</span></span><span class="line"><span class="ln">11</span><span class="cl">      uid(v) &lt;name&gt; &#34;first last&#34; .
+</span></span><span class="line"><span class="ln">12</span><span class="cl">      uid(v) &lt;email&gt; &#34;user@company1.io&#34; .
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    }
+</span></span><span class="line"><span class="ln">14</span><span class="cl">  }
+</span></span><span class="line"><span class="ln">15</span><span class="cl">}
+</span></span></code></pre></div><h2 id="graphql--dql">GraphQL &amp; DQL</h2>
+<p>说实话, <code>Dgraph</code>的文档还是有些糟糕, 你所需的信息可能藏在你根本想不到的角落(尽量将所有文档概览一下), 这个主题来自这篇<a href="https://dgraph.io/blog/post/graphql-vs-dql/" target="_blank" rel="noopener noreffer">Blog</a>.</p>
+<p>早期<code>Dgraph</code>是直接使用<code>GraphQL</code>作为数据库查询语言, 但很显然, <code>GraphQL</code>设计的初衷是用于<code>API</code>的, 只是语法看起来很&quot;graph&quot;, 所以很快就展现出了其局限性:</p>
+<blockquote>
+<p>A DQL schema is predicate-first focused and supports some aspects not yet supported by the GraphQL syntax such as multi-lingual predicates and facets (data information stored on edges between nodes).</p>
+<p>A GraphQL schema is type-first focused and only supports spec-compliant elements.</p>
+</blockquote>
+<p><code>DQL</code>是<code>Dgraph</code>基于<code>GraphQL</code>魔改的一套适于图数据库原生的查询语言, 事实上<code>Dgraph</code>核心只使用<code>DQL</code>, 任何传入的<code>GraphQL</code>请求都会先被重写为<code>DQL</code>.</p>
+<p>简单来说, 直接使用<code>GraphQL Endpoint</code>也未尝不可, <code>Dgraph</code>本身也可以是<code>GraphQL Native</code>, 但无论如何, 其内部还是使用的<code>DQL</code>, 其会据<code>GraphQL</code>的<code>schema'</code>生成一份等同的<code>DQL schema</code>, 反之则不然.</p>
+<p><code>GraphQL Endpoint</code>可以配备访问权限控制(<code>@auth directive... 等</code>), <code>DQL</code>更适合传统的后端开发(先查询数据, 做点自定操作然后再返回).</p>
+<h2 id="数据存储">数据存储</h2>
+<p><code>Dgraph</code>数据使用<code>Badger</code>存储, 一个基于<code>LSM-Tree</code>的<code>KV</code>数据库, 其设计使得它理论上能够很好的降低读写放大的问题.</p>
+<p><code>Dgraph</code>的图数据模型是<code>Triples</code>, 在存储时: 所有相同<code>predicate</code>的记录组成一个<code>shard</code>, 在该<code>shard</code>中, 具有同一<code>&lt;subject - predicate&gt;</code>关系的的记录会被组合浓缩成一条<code>K-V对</code>存储在<code>Badger中</code>. 该<code>value</code>又叫做<code>posting list</code>(搜索引擎术语, 根据搜索的term找到的排序好的文档ids). <code>posting list</code>作为一个<code>value</code>存储在<code>Badger</code>中, 而其<code>key</code>由<code>subject</code>及<code>predicate</code>共同推导而得.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">&lt;0x01&gt; &lt;follower&gt; &lt;0xab&gt; .
+</span></span><span class="line"><span class="ln">2</span><span class="cl">&lt;0x01&gt; &lt;follower&gt; &lt;0xbc&gt; .
+</span></span><span class="line"><span class="ln">3</span><span class="cl">&lt;0x01&gt; &lt;follower&gt; &lt;0xcd&gt; .
+</span></span><span class="line"><span class="ln">4</span><span class="cl">...
+</span></span><span class="line"><span class="ln">5</span><span class="cl">key = &lt;follower, 0x01&gt;
+</span></span><span class="line"><span class="ln">6</span><span class="cl">value = &lt;0xab, 0xbc, 0xcd, ...&gt;
+</span></span></code></pre></div><p>在<code>Dgraph</code>中你可以使用<code>debug</code>子命令来观察<code>posting list</code>结构:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="ln">1</span><span class="cl">docker stop dgraph-alpha <span class="c1"># 或复制一份p文件夹</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">docker debug -p Dgrpah/p
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="c1"># 具体使用方法</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">docker debug -h
+</span></span></code></pre></div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-08-27&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/28cbe2244e045837846cd7d255d7deea17630e45" target="_blank" title="commit by Peven(iampeven@gmail.com) 28cbe2244e045837846cd7d255d7deea17630e45: enable search">
+                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>28cbe22</a></span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2021/08/21/dgraph-memo/" data-title="Dgraph备忘录" data-hashtags="dgraph"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2021/08/21/dgraph-memo/" data-hashtag="dgraph"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2021/08/21/dgraph-memo/" data-title="Dgraph备忘录"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2021/08/21/dgraph-memo/" data-title="Dgraph备忘录"><i data-svg-src="https://unpkg.zhimg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2021/08/21/dgraph-memo/" data-title="Dgraph备忘录"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/dgraph/">dgraph</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/post/2021/05/08/the-red-black-tree/" class="prev" rel="prev" title="红黑树那点事儿"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>红黑树那点事儿</a>
+            <a href="/post/2021/09/04/raft-in-breif/" class="next" rel="next" title="Raft in breif">Raft in breif<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><script type="text/javascript" src="https://unpkg.zhimg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

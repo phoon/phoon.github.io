@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>dgraph - 标签 - 瘋魔</title>
+        <link>https://blog.peven.me/tags/dgraph/</link>
+        <description>dgraph - 标签 - 瘋魔</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sat, 21 Aug 2021 15:18:47 &#43;0800</lastBuildDate><atom:link href="https://blog.peven.me/tags/dgraph/" rel="self" type="application/rss+xml" /><item>
+    <title>Dgraph备忘录</title>
+    <link>https://blog.peven.me/post/2021/08/21/dgraph-memo/</link>
+    <pubDate>Sat, 21 Aug 2021 15:18:47 &#43;0800</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2021/08/21/dgraph-memo/</guid>
+    <description><![CDATA[不定时补充更新 部署 1docker pull dgraph/dgraph 2# HOSTIPADDR=10.0.0.10 # 用以后续告知raft模块通信地址,确保集群连通性, 我这儿后面直接写了 3cd .. 4mkdir -p Dgraph 5# 创建服务用户 6groupadd dgraph 7useradd -M -g dgraph -s /usr/sbin/nologin dgraph]]></description>
+</item>
+</channel>
+</rss>

@@ -1,0 +1,9 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>瘋魔</title>
+        <link>https://blog.peven.me/en/</link>
+        <description>Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here.</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
+            <atom:link href="https://blog.peven.me/en/index.xml" rel="self" type="application/rss+xml" />
+        </channel>
+</rss>

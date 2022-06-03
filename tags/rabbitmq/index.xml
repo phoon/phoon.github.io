@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>RabbitMQ - 标签 - 瘋魔</title>
+        <link>https://blog.peven.me/tags/rabbitmq/</link>
+        <description>RabbitMQ - 标签 - 瘋魔</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 03 Feb 2019 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://blog.peven.me/tags/rabbitmq/" rel="self" type="application/rss+xml" /><item>
+    <title>RabbitMQ初涉以及Golang实践</title>
+    <link>https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/</link>
+    <pubDate>Sun, 03 Feb 2019 00:00:00 &#43;0000</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/</guid>
+    <description><![CDATA[在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取]]></description>
+</item>
+</channel>
+</rss>

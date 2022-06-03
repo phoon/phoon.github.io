@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>InnoDB Doublewrite机制 - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="InnoDB Doublewrite机制" />
+<meta property="og:description" content="楔子 最近再次翻看《InnoDB存储引擎》，看到Doublewrite时，直觉告诉我这玩意儿应该很简单（其实确实是），但总感觉书上的文字表达不" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-10-06T11:42:28+08:00" />
+<meta property="article:modified_time" content="2021-10-06T23:37:58+08:00" /><meta property="og:site_name" content="My cool site" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
+
+<meta name="twitter:title" content="InnoDB Doublewrite机制"/>
+<meta name="twitter:description" content="楔子 最近再次翻看《InnoDB存储引擎》，看到Doublewrite时，直觉告诉我这玩意儿应该很简单（其实确实是），但总感觉书上的文字表达不"/>
+<meta name="application-name" content="瘋魔">
+<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" /><link rel="prev" href="https://blog.peven.me/post/2021/09/04/raft-in-breif/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.zhimg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://unpkg.zhimg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.zhimg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://unpkg.zhimg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "InnoDB Doublewrite机制",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/blog.peven.me\/post\/2021\/10\/06\/innodb-doublewrite\/"
+        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "InnoDB, Doublewrite","wordcount":  1900 ,
+        "url": "https:\/\/blog.peven.me\/post\/2021\/10\/06\/innodb-doublewrite\/","datePublished": "2021-10-06T11:42:28+08:00","dateModified": "2021-10-06T23:37:58+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
+                "@type": "Person",
+                "name": "Peven"
+            },"description": ""
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="瘋魔"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="/title.png"
+        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
+        data-sizes="auto"
+        alt="/title.png"
+        title="/title.png" /></a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2021/10/06/innodb-doublewrite/" selected>简体中文</option></select>
+                    </a><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="瘋魔"><img
+        class="lazyload logo"
+        src="/svg/loading.min.svg"
+        data-src="/title.png"
+        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
+        data-sizes="auto"
+        alt="/title.png"
+        title="/title.png" /></a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
+                    <select class="language-select" onchange="location = this.value;"><option value="/post/2021/10/06/innodb-doublewrite/" selected>简体中文</option></select>
+                </a></div>
+    </div>
+</header><div class="search-dropdown desktop">
+        <div id="search-dropdown-desktop"></div>
+    </div>
+    <div class="search-dropdown mobile">
+        <div id="search-dropdown-mobile"></div>
+    </div><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">InnoDB Doublewrite机制</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/%E5%90%8E%E7%AB%AF/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>后端</a>&nbsp;<a href="/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>系统设计</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2021-10-06">2021-10-06</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 1900 字&nbsp;
+                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 4 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#楔子">楔子</a></li>
+    <li><a href="#innodb逻辑存储结构">InnoDB逻辑存储结构</a></li>
+    <li><a href="#doublewrite机制">Doublewrite机制</a>
+      <ul>
+        <li><a href="#页断裂问题">页断裂问题</a></li>
+        <li><a href="#解决之道">解决之道</a></li>
+      </ul>
+    </li>
+    <li><a href="#references">References</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="楔子">楔子</h2>
+<p>最近再次翻看《InnoDB存储引擎》，看到<code>Doublewrite</code>时，直觉告诉我这玩意儿应该很简单（其实确实是），但总感觉书上的文字表达不够清晰，再加上这背后涉及到的底层知识其实也挺有趣的，遂各处寻解并作此文以记录。内容出于个人理解，有错误的地方还请指正。</p>
+<h2 id="innodb逻辑存储结构">InnoDB逻辑存储结构</h2>
+<p>在正式开始介绍<code>Doublewrite</code>技术前，先来粗略的看一下<code>InnoDB</code>存储引擎的逻辑存储结构：</p>
+<figure><a class="lightgallery" href="https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp" title="https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp" data-thumbnail="https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp" data-sub-html="<h2>InnoDB逻辑存储结构</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp"
+            data-srcset="https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp, https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp 1.5x, https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp 2x"
+            data-sizes="auto"
+            alt="https://dd-static.jd.com/ddimg/jfs/t1/207714/7/3802/38482/615d3929E75f1e719/79d3ccb5d940b1a1.webp" width="100%" />
+    </a><figcaption class="image-caption">InnoDB逻辑存储结构</figcaption>
+    </figure>
+<p><code>InnoDB</code>中所有的数据都逻辑地存放在表空间（Tablespace）中，且默认会有一个共享的表空间<code>ibdata1</code>（若启用了<code>innodb_file_per_table</code>参数，则每张表内的数据可单独放于一个表空间内）；表空间用来存放页（Page），也即<code>InnoDB</code>引擎进行磁盘管理的最小单位，页内按行存储了我们的实际数据，页大小由<code>innodb_page_size</code>参数设置，默认为16KB；一定数量的连续的页面会组成一个区（Extent），而区的大小则有以下规则限定：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Page Size</th>
+<th style="text-align:center">Consecutive Pages Count</th>
+<th style="text-align:center">Extent Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">4KB</td>
+<td style="text-align:center">256</td>
+<td style="text-align:center">1MB</td>
+</tr>
+<tr>
+<td style="text-align:center">8KB</td>
+<td style="text-align:center">128</td>
+<td style="text-align:center">1MB</td>
+</tr>
+<tr>
+<td style="text-align:center">16KB</td>
+<td style="text-align:center">64</td>
+<td style="text-align:center">1MB</td>
+</tr>
+<tr>
+<td style="text-align:center">32KB</td>
+<td style="text-align:center">64</td>
+<td style="text-align:center">2MB</td>
+</tr>
+<tr>
+<td style="text-align:center">64KB</td>
+<td style="text-align:center">64</td>
+<td style="text-align:center">4MB</td>
+</tr>
+</tbody>
+</table>
+<p>进而由多个区所构成的表空间文件叫做段（Segment），如数据段（图中<code>Leaf-node segment</code>）、索引段（图中<code>Non-Leaf-node segment</code>）、回滚段（图中<code>Rollback segment</code>，但注意：与其它段不同，回滚段里包含了其它的表空间段）等。</p>
+<p>对于<code>InnoDB</code>存储引擎的逻辑存储结构先介绍到这里，接下来我们来看<code>InnoDB</code>存储引擎里非常重要的<code>Doublewrite</code>特性。</p>
+<h2 id="doublewrite机制">Doublewrite机制</h2>
+<h3 id="页断裂问题">页断裂问题</h3>
+<p>页断裂，亦称部分写失效（partial page write），描述的是这样一个问题：恰逢系统宕机时，<code>InnoDB</code>正在更新/写入一个页的数据，可能会导致数据只完成部分写入，而剩余的部分的数据则是无效数据或者陈旧数据。</p>
+<p>发生这个问题的原因在于，对于<code>InnoDB</code>页的更新/写入不具备原子性。不具备原子性是因为：太大了（<code>InnoDB</code>页大小最小设置都得4KB，当然太小也不可取，这里仅为说明<code>页断裂</code>戏谑几句）。不像重做日志（redo log），<code>redo-log</code>的块大小为512字节，与磁盘扇区大小一致——对于磁盘来说，使用扇区作为最小传输单位，传统上扇区长度即为512字节。所以<code>redo-log</code>的写入可以保证原子性：因为从硬件设计上来说，现代硬盘自身的电量会足够完成断电后一个扇区的写入操作，以此保证原子性。</p>
+<p>而发生页断裂后，要进行修复的前提是，我们得有一份该页的副本。<code>InnoDB</code>默认会在加载页时对其进行完整性校验（Page Header和Page Trailer中记录了LSN数据），校验未通过则表明该页可能有页断裂问题，这时需要对该页进行恢复。有的人疑惑为什么这里不能通过redo log来对断裂页进行修复，因为redo log是根据页中的LSN来判断页是否需要进行恢复，换句话说，redo log根本解决不了页断裂的问题，毕竟该页面已经损坏了，无法提供信息给redo log参考。所以我们得重新写入该页面，而在哪里重新再获取到这个页面呢？</p>
+<h3 id="解决之道">解决之道</h3>
+<p>为了解决上面提到的问题，<code>InnoDB</code>引入了<code>Doublewrite</code>机制。其作用就是保存一份最近更新过的页的副本，方便发生页断裂时进行页恢复，从而保证在遇到系统宕机时写页面的原子性和持久性。由局部性（程序通常倾向于引用临近于其他最近引用过的数据项的数据项，抑或最近引用过的数据项本身）可知，这样的机制应该会有不错的效果表现。</p>
+<figure><a class="lightgallery" href="https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp" title="https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp" data-thumbnail="https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp" data-sub-html="<h2>doublewrite架构</h2>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp"
+            data-srcset="https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp, https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp 1.5x, https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp 2x"
+            data-sizes="auto"
+            alt="https://dd-static.jd.com/ddimg/jfs/t1/202757/10/10048/20616/615dada9Ee06b7ace/37559b99a206d04e.webp" width="100%" />
+    </a><figcaption class="image-caption">doublewrite架构</figcaption>
+    </figure>
+<p><code>Doublewrite</code>由两部分构成：内存中的<code>doublewrite buffer</code>以及共享表空间里的2个区（128个连续的页），它们的总大小都是2MB。</p>
+<p>这里使用两个Extent分两次写入还有一个用处：双重缓冲。当在对一个区进行写入时，对应的另一个区的<code>Doublewrite buffer</code>还可以继续缓冲待flush的脏页。</p>
+<p>在对内存缓冲池中的脏页进行flush时的步骤如下（此前对页的更改已经记录至redo log）：</p>
+<ul>
+<li>不直接写磁盘，先拷贝至<code>doublewrite buffer</code>；</li>
+<li><code>doublewrite buffer</code>分两次，每次1MB顺序地写入到共享表空间，随后立即调用fsync确保落盘；</li>
+<li>然后再次将<code>doublewrite buffer</code>的页写入到实际的数据文件，同样的调用fsync落盘。</li>
+</ul>
+<p>随后在出现需要进行页修复时，系统就可以在共享表空间内找到该页的一个副本，然后复制覆盖。</p>
+<h2 id="references">References</h2>
+<p>《Mysql技术内幕：InnoDB存储引擎》: <a href="https://www.amazon.cn/dp/B00ETOV48K" target="_blank" rel="noopener noreffer">https://www.amazon.cn/dp/B00ETOV48K</a></p>
+<p>《File Space Management &ndash; MySQL 8.0 Reference Manual》: <a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-file-space.html" target="_blank" rel="noopener noreffer">https://dev.mysql.com/doc/refman/8.0/en/innodb-file-space.html</a></p>
+<p>[Paper] InnoDB DoubleWrite Buffer as Read Cache using SSDs∗ : <a href="https://www.usenix.org/legacy/events/fast12/poster_descriptions/Kangdescription2-12-12.pdf" target="_blank" rel="noopener noreffer">https://www.usenix.org/legacy/events/fast12/poster_descriptions/Kangdescription2-12-12.pdf</a></p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-10-06&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/f4818330da03f29c71987f6af54fb99c2bbd6e7e" target="_blank" title="commit by Peven(iampeven@gmail.com) f4818330da03f29c71987f6af54fb99c2bbd6e7e: update post: Doublewrite in InnoDB">
+                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>f481833</a></span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" data-title="InnoDB Doublewrite机制" data-hashtags="InnoDB,Doublewrite"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" data-hashtag="InnoDB"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" data-title="InnoDB Doublewrite机制"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" data-title="InnoDB Doublewrite机制"><i data-svg-src="https://unpkg.zhimg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" data-title="InnoDB Doublewrite机制"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/innodb/">InnoDB</a>,&nbsp;<a href="/tags/doublewrite/">Doublewrite</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/post/2021/09/04/raft-in-breif/" class="prev" rel="prev" title="Raft in breif"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Raft in breif</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
+                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://unpkg.zhimg.com/lightgallery@2.4.0/css/lightgallery-bundle.min.css"><script type="text/javascript" src="https://unpkg.zhimg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lightgallery@2.4.0/lightgallery.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lightgallery@2.4.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/lightgallery@2.4.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.zhimg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"lightgallery":true,"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

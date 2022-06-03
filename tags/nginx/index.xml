@@ -1,0 +1,15 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Nginx - 标签 - 瘋魔</title>
+        <link>https://blog.peven.me/tags/nginx/</link>
+        <description>Nginx - 标签 - 瘋魔</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Tue, 04 Dec 2018 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://blog.peven.me/tags/nginx/" rel="self" type="application/rss+xml" /><item>
+    <title>使用Certbot签发免费泛域名SSL证书</title>
+    <link>https://blog.peven.me/post/2018/12/04/free-ssl-with-certbot/</link>
+    <pubDate>Tue, 04 Dec 2018 00:00:00 &#43;0000</pubDate>
+    <author>Peven</author>
+    <guid>https://blog.peven.me/post/2018/12/04/free-ssl-with-certbot/</guid>
+    <description><![CDATA[服务器环境： Archlinux Nginx1.15.6（自行编译） （1）安装Certbot 1sudo pacman -S certbot （2）开始签发 因为我的Nginx是自行编译的，所以无法使用c]]></description>
+</item>
+</channel>
+</rss>
