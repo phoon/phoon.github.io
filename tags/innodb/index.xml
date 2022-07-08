@@ -1,15 +1,1 @@
-<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
-    <channel>
-        <title>InnoDB - 标签 - 瘋魔</title>
-        <link>https://blog.peven.me/tags/innodb/</link>
-        <description>InnoDB - 标签 - 瘋魔</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Wed, 06 Oct 2021 11:42:28 &#43;0800</lastBuildDate><atom:link href="https://blog.peven.me/tags/innodb/" rel="self" type="application/rss+xml" /><item>
-    <title>InnoDB Doublewrite机制</title>
-    <link>https://blog.peven.me/post/2021/10/06/innodb-doublewrite/</link>
-    <pubDate>Wed, 06 Oct 2021 11:42:28 &#43;0800</pubDate>
-    <author>作者</author>
-    <guid>https://blog.peven.me/post/2021/10/06/innodb-doublewrite/</guid>
-    <description><![CDATA[楔子 最近再次翻看《InnoDB存储引擎》，看到Doublewrite时，直觉告诉我这玩意儿应该很简单（其实确实是），但总感觉书上的文字表达不]]></description>
-</item>
-</channel>
-</rss>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>InnoDB - 标签 - 瘋魔</title><link>https://blog.peven.me/tags/innodb/</link><description>InnoDB - 标签 - 瘋魔</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Wed, 06 Oct 2021 11:42:28 +0800</lastBuildDate><atom:link href="https://blog.peven.me/tags/innodb/" rel="self" type="application/rss+xml"/><item><title>InnoDB Doublewrite机制</title><link>https://blog.peven.me/post/2021/10/06/innodb-doublewrite/</link><pubDate>Wed, 06 Oct 2021 11:42:28 +0800</pubDate><author>作者</author><guid>https://blog.peven.me/post/2021/10/06/innodb-doublewrite/</guid><description>楔子 最近再次翻看《InnoDB存储引擎》，看到Doublewrite时，直觉告诉我这玩意儿应该很简单（其实确实是），但总感觉书上的文字表达不</description></item></channel></rss>

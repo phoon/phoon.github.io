@@ -1,15 +1,1 @@
-<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
-    <channel>
-        <title>raft - 标签 - 瘋魔</title>
-        <link>https://blog.peven.me/tags/raft/</link>
-        <description>raft - 标签 - 瘋魔</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sat, 04 Sep 2021 14:43:30 &#43;0800</lastBuildDate><atom:link href="https://blog.peven.me/tags/raft/" rel="self" type="application/rss+xml" /><item>
-    <title>Raft in breif</title>
-    <link>https://blog.peven.me/post/2021/09/04/raft-in-breif/</link>
-    <pubDate>Sat, 04 Sep 2021 14:43:30 &#43;0800</pubDate>
-    <author>作者</author>
-    <guid>https://blog.peven.me/post/2021/09/04/raft-in-breif/</guid>
-    <description><![CDATA[概览 算法实现概要" 算法实现概要 安全性保证 Raft保证以下五条准则在算法运行期间始终成立(Invariance): Election Safety: 一个世代term内至多产]]></description>
-</item>
-</channel>
-</rss>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>raft - 标签 - 瘋魔</title><link>https://blog.peven.me/tags/raft/</link><description>raft - 标签 - 瘋魔</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sat, 04 Sep 2021 14:43:30 +0800</lastBuildDate><atom:link href="https://blog.peven.me/tags/raft/" rel="self" type="application/rss+xml"/><item><title>Raft in breif</title><link>https://blog.peven.me/post/2021/09/04/raft-in-breif/</link><pubDate>Sat, 04 Sep 2021 14:43:30 +0800</pubDate><author>作者</author><guid>https://blog.peven.me/post/2021/09/04/raft-in-breif/</guid><description>概览 算法实现概要 安全性保证 Raft保证以下五条准则在算法运行期间始终成立(Invariance): Election Safety: 一个世代term内至多产生一个lead</description></item></channel></rss>

@@ -1,242 +1,65 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noodp" />
-        <title>[译]pselect()系统调用 - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="[译]pselect()系统调用" />
-<meta property="og:description" content="译自 [The new pselect() system call] https://lwn.net/Articles/176911/ 像网络服务器等需要使用select()，poll()，或者epoll_wait()(Linux独有)等系统调用来对多个文件描" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2019-04-09T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-08-26T23:51:45+08:00" /><meta property="og:site_name" content="My cool site" />
-
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
-
-<meta name="twitter:title" content="[译]pselect()系统调用"/>
-<meta name="twitter:description" content="译自 [The new pselect() system call] https://lwn.net/Articles/176911/ 像网络服务器等需要使用select()，poll()，或者epoll_wait()(Linux独有)等系统调用来对多个文件描"/>
-<meta name="application-name" content="瘋魔">
-<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" /><link rel="prev" href="https://blog.peven.me/post/2019/03/09/working-with-mysql-in-golang/" /><link rel="next" href="https://blog.peven.me/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
-    {
-        "@context": "http://schema.org",
-        "@type": "BlogPosting",
-        "headline": "[译]pselect()系统调用",
-        "inLanguage": "zh-CN",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https:\/\/blog.peven.me\/post\/2019\/04\/09\/the-new-pselect-system-call\/"
-        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "Linux","wordcount":  2202 ,
-        "url": "https:\/\/blog.peven.me\/post\/2019\/04\/09\/the-new-pselect-system-call\/","datePublished": "2019-04-09T00:00:00+00:00","dateModified": "2021-08-26T23:51:45+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
-            "@type": "Organization",
-            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
-                "@type": "Person",
-                "name": "Peven"
-            },"description": ""
-    }
-    </script></head>
-    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
-
-        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
-    <div class="header-wrapper">
-        <div class="header-title">
-            <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-        </div>
-        <div class="menu">
-            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2019/04/09/the-new-pselect-system-call/" selected>简体中文</option></select>
-                    </a><span class="menu-item search" id="search-desktop">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-desktop">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</header><header class="mobile" id="header-mobile">
-    <div class="header-container">
-        <div class="header-wrapper">
-            <div class="header-title">
-                <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-            </div>
-            <div class="menu-toggle" id="menu-toggle-mobile">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="menu" id="menu-mobile"><div class="search-wrapper">
-                    <div class="search mobile" id="search-mobile">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-mobile">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
-                        取消
-                    </a>
-                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/post/2019/04/09/the-new-pselect-system-call/" selected>简体中文</option></select>
-                </a></div>
-    </div>
-</header><div class="search-dropdown desktop">
-        <div id="search-dropdown-desktop"></div>
-    </div>
-    <div class="search-dropdown mobile">
-        <div id="search-dropdown-mobile"></div>
-    </div><main class="main">
-                <div class="container"><div class="toc" id="toc-auto">
-            <h2 class="toc-title">目录</h2>
-            <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">[译]pselect()系统调用</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/linux/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>Linux</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2019-04-09">2019-04-09</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 2202 字&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 5 分钟&nbsp;</div>
-        </div><div class="details toc" id="toc-static"  data-kept="">
-                <div class="details-summary toc-title">
-                    <span>目录</span>
-                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
-                </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents"></nav></div>
-            </div><div class="content" id="content"><p><code>译自 [The new pselect() system call] https://lwn.net/Articles/176911/</code></p>
-<p>像网络服务器等需要使用<code>select()</code>，<code>poll()</code>，或者<code>epoll_wait()</code>(Linux独有)等系统调用来对多个文件描述符进行监视的应用程序有时会面临这样一个问题：该如何等待其中的一个文件描述符变为<code>ready</code>状态，或者是接收一个signal（比如<code>SIGINT</code>）。因为事实表明，这些系统调用不能很好地与信号进行交互。</p>
-<p>一个看似显而易见的解决方案是写一个空的信号处理器，以便传递信号从而中断<code>select()</code>的调用。</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span> <span class="p">{}</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">	<span class="n">fd_set</span> <span class="n">readfds</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">	<span class="k">struct</span> <span class="n">sigaction</span> <span class="n">sa</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl">	<span class="kt">int</span> <span class="n">nfds</span><span class="p">,</span> <span class="n">ready</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">	<span class="n">sa</span><span class="p">.</span><span class="n">sa_handler</span> <span class="o">=</span> <span class="n">handler</span><span class="p">;</span>     <span class="cm">/* Establish signal handler */</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="n">sigemptyset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sa</span><span class="p">.</span><span class="n">sa_mask</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">11</span><span class="cl">	<span class="n">sa</span><span class="p">.</span><span class="n">sa_flags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln">12</span><span class="cl">	<span class="n">sigaction</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sa</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">13</span><span class="cl">	<span class="cm">/* ... */</span>    
-</span></span><span class="line"><span class="ln">14</span><span class="cl">	<span class="n">ready</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">nfds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readfds</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">15</span><span class="cl">	<span class="cm">/* ... */</span>
-</span></span></code></pre></div><p>待到<code>select()</code>返回，我们就可以通过查看其返回值以及<code>errno</code>来确定发生了什么。如果<code>errno</code>是<code>EINTR</code>，我们就知道<code>select()</code>的调用被信号给中断了，并做出了相应的行动。但这种解决方案存在竞态条件：如果信号<code>SIGINT</code>是在调用了<code>sigaction()</code>函数之后，但在调用<code>select()</code>之前传递过去的，那么它将无法中断<code>select()</code>调用，因为这时候信号已经丢失了。</p>
-<p>我们也可以尝试其他的方案，比如在信号处理器里设置一个全局标志，然后在主程序里监控这个标志，并使用<code>sigprocmask()</code>来阻塞那个信号直到调用了<code>select()</code>。然而，这些技术都不能完全消除竞态条件：因为在<code>select()</code>调用开始之前，总是有一段时间间隔（无论其有多么短）可以处理信号。</p>
-<p>这个问题的传统解决方案是所谓的<code>自管(self-pipe)</code>技巧，通常认为是由<a href="http://cr.yp.to/docs/selfpipe.html" target="_blank" rel="noopener noreffer">D J Bernstein</a>首创的。使用这个技术，程序建立一个信号处理器，该信号处理器将一个字节写入一个特别建立的管道之中，该管道的读取端也将由<code>select()</code>进行监控。<code>self-pipe</code>技术很巧妙的解决了安全的等待文件描述符变为<code>ready</code>状态或者需要传递信号的问题。然而，这需要通过大量的代码来解决一个实质上很简单的需求。（例如，一个健壮的解决方案需要同时标记管道的读写端）</p>
-<p>出于此因，<code>POSIX.1g</code>委员会设计了一个<code>select()</code>的增强版本，也就是<code>pselect()</code>。<code>select()</code>与<code>pselect()</code>之间最主要的区别就是后者有一个<code>sigset_t</code>类型的信号掩码（sigmask）作为额外的参数：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln">1</span><span class="cl"><span class="kt">int</span> <span class="nf">pselect</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">fd_set</span> <span class="o">*</span><span class="n">readfds</span><span class="p">,</span> <span class="n">fd_set</span> <span class="o">*</span><span class="n">writefds</span><span class="p">,</span> <span class="n">fd_set</span> <span class="o">*</span><span class="n">exceptfds</span><span class="p">,</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">            <span class="k">const</span> <span class="k">struct</span> <span class="n">timespec</span> <span class="o">*</span><span class="n">timeout</span><span class="p">,</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">            <span class="k">const</span> <span class="n">sigset_t</span> <span class="o">*</span><span class="n">sigmask</span><span class="p">);</span>
-</span></span></code></pre></div><p><code>sigmask</code>参数指定了一个应该在<code>pselect()</code>调用期间阻塞的信号集合，它会在调用期间覆盖当前的信号掩码。当我们做以下调用时：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln">1</span><span class="cl"> <span class="n">ready</span> <span class="o">=</span> <span class="n">pselect</span><span class="p">(</span><span class="n">nfds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readfds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">writefds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">exceptfds</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sigmask</span><span class="p">);</span>
-</span></span></code></pre></div><p>内核会执行一系列步骤，这相当于原子地执行以下系统调用：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">sigset_t</span> <span class="n">sigsaved</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">
-</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">sigprocmask</span><span class="p">(</span><span class="n">SIG_SETMASK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sigmask</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sigsaved</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="n">ready</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">nfds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readfds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">writefds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">exceptfds</span><span class="p">,</span> <span class="n">timeout</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">sigprocmask</span><span class="p">(</span><span class="n">SIG_SETMASK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sigsaved</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span></code></pre></div><p><code>glibc</code>虽也提供了<code>pselect()</code>的库实现，而且实际上也是使用了上面的系统调用序列。但问题是，这种实现依然很容易受到<code>pselect()</code>用来避免竞态条件的设计的影响，因为单独的系统调用并不是原子的。</p>
-<p>使用<code>pselect()</code>，我们可以安全地等待信号传递或者文件描述符进入ready状态，只需将我们前面的示例代码修改为：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">sigset_t</span> <span class="n">emptyset</span><span class="p">,</span> <span class="n">blockset</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="n">sigemptyset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">blockset</span><span class="p">);</span>         <span class="cm">/* Block SIGINT */</span>
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="n">sigaddset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">blockset</span><span class="p">,</span> <span class="n">SIGINT</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="n">sigprocmask</span><span class="p">(</span><span class="n">SIG_BLOCK</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">blockset</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="n">sa</span><span class="p">.</span><span class="n">sa_handler</span> <span class="o">=</span> <span class="n">handler</span><span class="p">;</span>        <span class="cm">/* Establish signal handler */</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="n">sa</span><span class="p">.</span><span class="n">sa_flags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="n">sigemptyset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sa</span><span class="p">.</span><span class="n">sa_mask</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="n">sigaction</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sa</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">11</span><span class="cl">    
-</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="cm">/* Initialize nfds and readfds, and perhaps do other work here */</span>
-</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="cm">/* Unblock signal, then wait for signal or ready file descriptor */</span>
-</span></span><span class="line"><span class="ln">14</span><span class="cl">
-</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="n">sigemptyset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emptyset</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="n">ready</span> <span class="o">=</span> <span class="n">pselect</span><span class="p">(</span><span class="n">nfds</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">readfds</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">emptyset</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="p">...</span> 
-</span></span></code></pre></div><p>这段代码可以工作，因为<code>SIGINT</code>信号只有在控制传递给内核之后才会被解除阻塞。因此，在<code>pselect()</code>执行之前，无法传递信号。如果信号是在<code>pselect()</code>被阻塞时生成的，那么与<code>select()</code>一样，系统调用将被中断，且信号将在系统调用返回之前传递完成。</p>
-<p>虽然<code>pselect()</code>是在几年前构思的，也已经在1998由<a href="http://www.kohala.com/start/" target="_blank" rel="noopener noreffer">W. Richard Stevens</a>在其著作*Unix Network Programming, vol. 1, 2nd ed.*中公布，但实际的实现却很晚才出现。随着2.6.16版本的释出，以及更新的<code>glibc</code>2.4，Linux才可以使用<code>pselect()</code>。</p>
-<p>Linux 2.6.16同时也包含了一个新的（但不是标准的）<code>ppoll()</code>系统调用，它也是在传统的<code>poll()</code>接口中增加了一个信号掩码参数：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln">1</span><span class="cl"><span class="kt">int</span> <span class="nf">ppoll</span><span class="p">(</span><span class="k">struct</span> <span class="n">pollfd</span> <span class="o">*</span><span class="n">fds</span><span class="p">,</span> <span class="n">nfds_t</span> <span class="n">nfds</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">timespec</span> <span class="o">*</span><span class="n">timeout</span><span class="p">,</span> 
-</span></span><span class="line"><span class="ln">2</span><span class="cl">             <span class="k">const</span> <span class="n">sigset_t</span> <span class="o">*</span><span class="n">sigmask</span><span class="p">);</span>
-</span></span></code></pre></div><p><code>ppoll()</code>增添了与<code>pselect()</code>相对于<code>select()</code>相同的功能。为了不受冷落，<code>epoll</code>维护者在<code>pipeline</code>中添加了补丁，以新的<code>epoll_pwait()</code>系统调用的形式添加类似的功能。</p>
-<p><code>pselect()</code>和<code>ppoll()</code>与传统方法相比还有一些其他的细微差别。例如超时的类型为:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">struct</span> <span class="n">timespec</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">	<span class="kt">long</span> <span class="n">tv_sec</span><span class="p">;</span>        <span class="cm">/* Seconds */</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">	<span class="kt">long</span> <span class="n">tv_nsec</span><span class="p">;</span>       <span class="cm">/* Nanoseconds */</span>
-</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="p">};</span>
-</span></span></code></pre></div><p>这允许用比以前的系统调用更高的精度来指定超时间隔。</p>
-<p><code>pselect()</code>和<code>select()</code>的<code>glibc</code> wrappers还隐藏了一些底层系统调用细节:</p>
-<p>首先，系统调用实际上期望信号掩码由两个参数来进行描述，其中一个参数是一个指向<code>sigset_t</code>结构的指针，而另一个参数是一个以字节表示该结构大小的整数。这使得将来可能会有更大的<code>sigset_t</code>类型。</p>
-<p>底层系统调用还修改了他们的超时参数，以便在函数提前返回时（文件描述符进入<code>ready</code>状态，或者传递了信号），调用方能够知道剩余的超时时间。但是，各个wrapper函数通过创建超时参数的本地副本并将该副本传递给底层系统调用来隐藏其详情。（Linux的<code>select()</code>也修改了其超时参数，并且对应用程序是可见的。不过许多其他的<code>select()</code>实现并没有修改此参数。<code>POSIX.1</code>承认他们之中的任何一种实现。）</p>
-<p>有关<code>pselect()</code>和<code>ppoll()</code>的详细信息可以在man pages中查询<code>select(2)</code>和<code>poll(2)</code>。</p>
-<p>原文：</p>
-<p><a href="https://lwn.net/Articles/176911/" target="_blank" rel="noopener noreffer">The new pselect() system call - [LWN.net]</a></p>
-</div><div class="post-footer" id="post-footer">
-    <div class="post-info">
-        <div class="post-info-line">
-            <div class="post-info-mod">
-                <span>更新于 2021-08-26&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/c3203136affb661e6a8e593e46d6cdf76609b934" target="_blank" title="commit by Peven(iampeven@gmail.com) c3203136affb661e6a8e593e46d6cdf76609b934: remove unused files">
-                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>c320313</a></span>
-            </div></div>
-        <div class="post-info-line">
-            <div class="post-info-md"></div>
-            <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" data-title="[译]pselect()系统调用" data-hashtags="Linux"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" data-hashtag="Linux"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" data-title="[译]pselect()系统调用"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" data-title="[译]pselect()系统调用"><i data-svg-src="https://unpkg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/" data-title="[译]pselect()系统调用"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="post-info-more">
-        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/linux/">Linux</a></section>
-        <section>
-            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
-        </section>
-    </div>
-
-    <div class="post-nav"><a href="/post/2019/03/09/working-with-mysql-in-golang/" class="prev" rel="prev" title="在Golang中对MySQL进行操作"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>在Golang中对MySQL进行操作</a>
-            <a href="/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/" class="next" rel="next" title="解决Archlinux下蓝牙鼠标滞后感严重的问题">解决Archlinux下蓝牙鼠标滞后感严重的问题<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
-</div>
-</article></div>
-            </main><footer class="footer">
-        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
-                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
-        </div>
-    </footer></div>
-
-        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
-                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
-            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
-                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
-            </a>
-        </div><script type="text/javascript" src="https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
-</html>
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><title>[译]pselect()系统调用 - 瘋魔</title><meta name=Description content="Peven's web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="[译]pselect()系统调用"><meta property="og:description" content="译自 [The new pselect() system call] https://lwn.net/Articles/176911/ 像网络服务器等需要使用select()，poll()，或者epoll_wait()(Linux独有)等系统调用来对多个文件描"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/"><meta property="og:image" content="https://blog.peven.me/logo.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-04-09T00:00:00+00:00"><meta property="article:modified_time" content="2022-07-08T23:12:51+08:00"><meta property="og:site_name" content="My cool site"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://blog.peven.me/logo.png"><meta name=twitter:title content="[译]pselect()系统调用"><meta name=twitter:description content="译自 [The new pselect() system call] https://lwn.net/Articles/176911/ 像网络服务器等需要使用select()，poll()，或者epoll_wait()(Linux独有)等系统调用来对多个文件描"><meta name=application-name content="瘋魔"><meta name=apple-mobile-web-app-title content="瘋魔"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/><link rel=prev href=https://blog.peven.me/post/2019/03/09/working-with-mysql-in-golang/><link rel=next href=https://blog.peven.me/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://unpkg.com/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"[译]pselect()系统调用","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/blog.peven.me\/post\/2019\/04\/09\/the-new-pselect-system-call\/"},"image":["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre":"posts","keywords":"Linux","wordcount":2225,"url":"https:\/\/blog.peven.me\/post\/2019\/04\/09\/the-new-pselect-system-call\/","datePublished":"2019-04-09T00:00:00+00:00","dateModified":"2022-07-08T23:12:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Peven","logo":"https:\/\/blog.peven.me\/images\/avatar.jpg"},"author":{"@type":"Person","name":"Peven"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>标签 </a><a class=menu-item href=/categories/>分类 </a><a class=menu-item href=/friends/>友链 </a><a class=menu-item href=/about/>关于 </a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i> </a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i> </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item language" title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select id=language-select-desktop onchange="location=this.value"><option value=/post/2019/04/09/the-new-pselect-system-call/ selected>简体中文</option></select>
+</a><span class="menu-item search" id=search-desktop><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span>
+</span><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题><i class="fas fa-adjust fa-fw" aria-hidden=true></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a class=menu-item href=/posts/ title>所有文章</a><a class=menu-item href=/tags/ title>标签</a><a class=menu-item href=/categories/ title>分类</a><a class=menu-item href=/friends/ title>友链</a><a class=menu-item href=/about/ title>关于</a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i></a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i></a><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题>
+<i class="fas fa-adjust fa-fw" aria-hidden=true></i>
+</a><a href=javascript:void(0); class=menu-item title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select onchange="location=this.value"><option value=/post/2019/04/09/the-new-pselect-system-call/ selected>简体中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目录</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">[译]pselect()系统调用</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=https://blog.peven.me title=Author target=_blank rel="noopener noreffer author" class=author><i class="fas fa-user-circle fa-fw" aria-hidden=true></i>Peven</a></span>&nbsp;<span class=post-category>收录于 <a href=/categories/linux/><i class="far fa-folder fa-fw" aria-hidden=true></i>Linux</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw" aria-hidden=true></i>&nbsp;<time datetime=2019-04-09>2019-04-09</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden=true></i>&nbsp;约 2225 字&nbsp;
+<i class="far fa-clock fa-fw" aria-hidden=true></i>&nbsp;预计阅读 5 分钟&nbsp;</div></div><div class="details toc" id=toc-static data-kept><div class="details-summary toc-title"><span>目录</span>
+<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents></nav></div></div><div class=content id=content><p><code>译自 [The new pselect() system call] https://lwn.net/Articles/176911/</code></p><p>像网络服务器等需要使用<code>select()</code>，<code>poll()</code>，或者<code>epoll_wait()</code>(Linux独有)等系统调用来对多个文件描述符进行监视的应用程序有时会面临这样一个问题：该如何等待其中的一个文件描述符变为<code>ready</code>状态，或者是接收一个signal（比如<code>SIGINT</code>）。因为事实表明，这些系统调用不能很好地与信号进行交互。</p><p>一个看似显而易见的解决方案是写一个空的信号处理器，以便传递信号从而中断<code>select()</code>的调用。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln> 1</span><span class=cl><span class=k>static</span> <span class=kt>void</span> <span class=nf>handler</span><span class=p>(</span><span class=kt>int</span> <span class=n>sig</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>    
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>int</span> <span class=n>argc</span><span class=p>,</span> <span class=kt>char</span> <span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>	<span class=n>fd_set</span> <span class=n>readfds</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>	<span class=k>struct</span> <span class=n>sigaction</span> <span class=n>sa</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>	<span class=kt>int</span> <span class=n>nfds</span><span class=p>,</span> <span class=n>ready</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>	<span class=n>sa</span><span class=p>.</span><span class=n>sa_handler</span> <span class=o>=</span> <span class=n>handler</span><span class=p>;</span>     <span class=cm>/* Establish signal handler */</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=n>sigemptyset</span><span class=p>(</span><span class=o>&amp;</span><span class=n>sa</span><span class=p>.</span><span class=n>sa_mask</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>	<span class=n>sa</span><span class=p>.</span><span class=n>sa_flags</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>	<span class=n>sigaction</span><span class=p>(</span><span class=n>SIGINT</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sa</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl>	<span class=cm>/* ... */</span>    
+</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=n>ready</span> <span class=o>=</span> <span class=n>select</span><span class=p>(</span><span class=n>nfds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>readfds</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>	<span class=cm>/* ... */</span>
+</span></span></code></pre></div><p>待到<code>select()</code>返回，我们就可以通过查看其返回值以及<code>errno</code>来确定发生了什么。如果<code>errno</code>是<code>EINTR</code>，我们就知道<code>select()</code>的调用被信号给中断了，并做出了相应的行动。但这种解决方案存在竞态条件：如果信号<code>SIGINT</code>是在调用了<code>sigaction()</code>函数之后，但在调用<code>select()</code>之前传递过去的，那么它将无法中断<code>select()</code>调用，因为这时候信号已经丢失了。</p><p>我们也可以尝试其他的方案，比如在信号处理器里设置一个全局标志，然后在主程序里监控这个标志，并使用<code>sigprocmask()</code>来阻塞那个信号直到调用了<code>select()</code>。然而，这些技术都不能完全消除竞态条件：因为在<code>select()</code>调用开始之前，总是有一段时间间隔（无论其有多么短）可以处理信号。</p><p>这个问题的传统解决方案是所谓的<code>自管(self-pipe)</code>技巧，通常认为是由<a href=http://cr.yp.to/docs/selfpipe.html target=_blank rel="noopener noreffer">D J Bernstein</a>首创的。使用这个技术，程序建立一个信号处理器，该信号处理器将一个字节写入一个特别建立的管道之中，该管道的读取端也将由<code>select()</code>进行监控。<code>self-pipe</code>技术很巧妙的解决了安全的等待文件描述符变为<code>ready</code>状态或者需要传递信号的问题。然而，这需要通过大量的代码来解决一个实质上很简单的需求。（例如，一个健壮的解决方案需要同时标记管道的读写端）</p><p>出于此因，<code>POSIX.1g</code>委员会设计了一个<code>select()</code>的增强版本，也就是<code>pselect()</code>。<code>select()</code>与<code>pselect()</code>之间最主要的区别就是后者有一个<code>sigset_t</code>类型的信号掩码（sigmask）作为额外的参数：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>pselect</span><span class=p>(</span><span class=kt>int</span> <span class=n>n</span><span class=p>,</span> <span class=n>fd_set</span> <span class=o>*</span><span class=n>readfds</span><span class=p>,</span> <span class=n>fd_set</span> <span class=o>*</span><span class=n>writefds</span><span class=p>,</span> <span class=n>fd_set</span> <span class=o>*</span><span class=n>exceptfds</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>            <span class=k>const</span> <span class=k>struct</span> <span class=n>timespec</span> <span class=o>*</span><span class=n>timeout</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>            <span class=k>const</span> <span class=n>sigset_t</span> <span class=o>*</span><span class=n>sigmask</span><span class=p>);</span>
+</span></span></code></pre></div><p><code>sigmask</code>参数指定了一个应该在<code>pselect()</code>调用期间阻塞的信号集合，它会在调用期间覆盖当前的信号掩码。当我们做以下调用时：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln>1</span><span class=cl> <span class=n>ready</span> <span class=o>=</span> <span class=n>pselect</span><span class=p>(</span><span class=n>nfds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>readfds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>writefds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>exceptfds</span><span class=p>,</span> <span class=n>timeout</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sigmask</span><span class=p>);</span>
+</span></span></code></pre></div><p>内核会执行一系列步骤，这相当于原子地执行以下系统调用：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln>1</span><span class=cl><span class=n>sigset_t</span> <span class=n>sigsaved</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>
+</span></span><span class=line><span class=ln>3</span><span class=cl><span class=n>sigprocmask</span><span class=p>(</span><span class=n>SIG_SETMASK</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sigmask</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sigsaved</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=n>ready</span> <span class=o>=</span> <span class=n>select</span><span class=p>(</span><span class=n>nfds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>readfds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>writefds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>exceptfds</span><span class=p>,</span> <span class=n>timeout</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl><span class=n>sigprocmask</span><span class=p>(</span><span class=n>SIG_SETMASK</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sigsaved</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>);</span>
+</span></span></code></pre></div><p><code>glibc</code>虽也提供了<code>pselect()</code>的库实现，而且实际上也是使用了上面的系统调用序列。但问题是，这种实现依然很容易受到<code>pselect()</code>用来避免竞态条件的设计的影响，因为单独的系统调用并不是原子的。</p><p>使用<code>pselect()</code>，我们可以安全地等待信号传递或者文件描述符进入ready状态，只需将我们前面的示例代码修改为：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln> 1</span><span class=cl><span class=n>sigset_t</span> <span class=n>emptyset</span><span class=p>,</span> <span class=n>blockset</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>
+</span></span><span class=line><span class=ln> 3</span><span class=cl><span class=n>sigemptyset</span><span class=p>(</span><span class=o>&amp;</span><span class=n>blockset</span><span class=p>);</span>         <span class=cm>/* Block SIGINT */</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl><span class=n>sigaddset</span><span class=p>(</span><span class=o>&amp;</span><span class=n>blockset</span><span class=p>,</span> <span class=n>SIGINT</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=n>sigprocmask</span><span class=p>(</span><span class=n>SIG_BLOCK</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>blockset</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>);</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=n>sa</span><span class=p>.</span><span class=n>sa_handler</span> <span class=o>=</span> <span class=n>handler</span><span class=p>;</span>        <span class=cm>/* Establish signal handler */</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl><span class=n>sa</span><span class=p>.</span><span class=n>sa_flags</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=n>sigemptyset</span><span class=p>(</span><span class=o>&amp;</span><span class=n>sa</span><span class=p>.</span><span class=n>sa_mask</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl><span class=n>sigaction</span><span class=p>(</span><span class=n>SIGINT</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>sa</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>    
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=cm>/* Initialize nfds and readfds, and perhaps do other work here */</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=cm>/* Unblock signal, then wait for signal or ready file descriptor */</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>
+</span></span><span class=line><span class=ln>15</span><span class=cl><span class=n>sigemptyset</span><span class=p>(</span><span class=o>&amp;</span><span class=n>emptyset</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl><span class=n>ready</span> <span class=o>=</span> <span class=n>pselect</span><span class=p>(</span><span class=n>nfds</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>readfds</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=nb>NULL</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>emptyset</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl><span class=p>...</span> 
+</span></span></code></pre></div><p>这段代码可以工作，因为<code>SIGINT</code>信号只有在控制传递给内核之后才会被解除阻塞。因此，在<code>pselect()</code>执行之前，无法传递信号。如果信号是在<code>pselect()</code>被阻塞时生成的，那么与<code>select()</code>一样，系统调用将被中断，且信号将在系统调用返回之前传递完成。</p><p>虽然<code>pselect()</code>是在几年前构思的，也已经在1998由<a href=http://www.kohala.com/start/ target=_blank rel="noopener noreffer">W. Richard Stevens</a>在其著作*Unix Network Programming, vol. 1, 2nd ed.*中公布，但实际的实现却很晚才出现。随着2.6.16版本的释出，以及更新的<code>glibc</code>2.4，Linux才可以使用<code>pselect()</code>。</p><p>Linux 2.6.16同时也包含了一个新的（但不是标准的）<code>ppoll()</code>系统调用，它也是在传统的<code>poll()</code>接口中增加了一个信号掩码参数：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln>1</span><span class=cl><span class=kt>int</span> <span class=nf>ppoll</span><span class=p>(</span><span class=k>struct</span> <span class=n>pollfd</span> <span class=o>*</span><span class=n>fds</span><span class=p>,</span> <span class=n>nfds_t</span> <span class=n>nfds</span><span class=p>,</span> <span class=k>const</span> <span class=k>struct</span> <span class=n>timespec</span> <span class=o>*</span><span class=n>timeout</span><span class=p>,</span> 
+</span></span><span class=line><span class=ln>2</span><span class=cl>             <span class=k>const</span> <span class=n>sigset_t</span> <span class=o>*</span><span class=n>sigmask</span><span class=p>);</span>
+</span></span></code></pre></div><p><code>ppoll()</code>增添了与<code>pselect()</code>相对于<code>select()</code>相同的功能。为了不受冷落，<code>epoll</code>维护者在<code>pipeline</code>中添加了补丁，以新的<code>epoll_pwait()</code>系统调用的形式添加类似的功能。</p><p><code>pselect()</code>和<code>ppoll()</code>与传统方法相比还有一些其他的细微差别。例如超时的类型为:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln>1</span><span class=cl><span class=k>struct</span> <span class=n>timespec</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>	<span class=kt>long</span> <span class=n>tv_sec</span><span class=p>;</span>        <span class=cm>/* Seconds */</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>	<span class=kt>long</span> <span class=n>tv_nsec</span><span class=p>;</span>       <span class=cm>/* Nanoseconds */</span>
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=p>};</span>
+</span></span></code></pre></div><p>这允许用比以前的系统调用更高的精度来指定超时间隔。</p><p><code>pselect()</code>和<code>select()</code>的<code>glibc</code> wrappers还隐藏了一些底层系统调用细节:</p><p>首先，系统调用实际上期望信号掩码由两个参数来进行描述，其中一个参数是一个指向<code>sigset_t</code>结构的指针，而另一个参数是一个以字节表示该结构大小的整数。这使得将来可能会有更大的<code>sigset_t</code>类型。</p><p>底层系统调用还修改了他们的超时参数，以便在函数提前返回时（文件描述符进入<code>ready</code>状态，或者传递了信号），调用方能够知道剩余的超时时间。但是，各个wrapper函数通过创建超时参数的本地副本并将该副本传递给底层系统调用来隐藏其详情。（Linux的<code>select()</code>也修改了其超时参数，并且对应用程序是可见的。不过许多其他的<code>select()</code>实现并没有修改此参数。<code>POSIX.1</code>承认他们之中的任何一种实现。）</p><p>有关<code>pselect()</code>和<code>ppoll()</code>的详细信息可以在man pages中查询<code>select(2)</code>和<code>poll(2)</code>。</p><p>原文：</p><p><a href=https://lwn.net/Articles/176911/ target=_blank rel="noopener noreffer">The new pselect() system call - [LWN.net]</a></p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-08&nbsp;<a class=git-hash href=https://github.com/phoon/phoon.github.io/commit/e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6 target=_blank title="commit by PevenPhoon(iampeven@gmail.com) e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6: action add clone theme">
+<i class="fas fa-hashtag fa-fw" aria-hidden=true></i>e8ee37b</a></span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/ data-title=[译]pselect()系统调用 data-hashtags=Linux><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/ data-hashtag=Linux><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Hacker News" data-sharer=hackernews data-url=https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/ data-title=[译]pselect()系统调用><i class="fab fa-hacker-news fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Line" data-sharer=line data-url=https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/ data-title=[译]pselect()系统调用><i data-svg-src=https://unpkg.com/simple-icons@7.0.0/icons/line.svg aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 微博" data-sharer=weibo data-url=https://blog.peven.me/post/2019/04/09/the-new-pselect-system-call/ data-title=[译]pselect()系统调用><i class="fab fa-weibo fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/linux/>Linux</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主页</a></span></section></div><div class=post-nav><a href=/post/2019/03/09/working-with-mysql-in-golang/ class=prev rel=prev title=在Golang中对MySQL进行操作><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>在Golang中对MySQL进行操作</a>
+<a href=/post/2019/08/15/anywhere2s-polling-issue-on-archlinux/ class=next rel=next title=解决Archlinux下蓝牙鼠标滞后感严重的问题>解决Archlinux下蓝牙鼠标滞后感严重的问题<i class="fas fa-angle-right fa-fw" aria-hidden=true></i></a></div></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line>由 <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.101.0">Hugo</a> 强力驱动 | 主题 - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden=true></i> LoveIt</a></div><div class=footer-line itemscope itemtype=http://schema.org/CreativeWork><i class="far fa-copyright fa-fw" aria-hidden=true></i><span itemprop=copyrightYear>2018 - 2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=https://blog.peven.me target=_blank>Peven</a></span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw" aria-hidden=true></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw" aria-hidden=true></i></a></div><script type=text/javascript src=https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://unpkg.com/lunr@2.3.9/lunr.min.js></script><script type=text/javascript src=/lib/lunr/lunr.stemmer.support.min.js></script><script type=text/javascript src=/lib/lunr/lunr.zh.min.js></script><script type=text/javascript src=https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js></script><script type=text/javascript src=https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js></script><script type=text/javascript src=https://unpkg.com/sharer.js@0.5.1/sharer.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:40},comment:{},search:{highlightTag:"em",lunrIndexURL:"/index.json",lunrLanguageCode:"zh",lunrSegmentitURL:"/lib/lunr/lunr.segmentit.js",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"lunr"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

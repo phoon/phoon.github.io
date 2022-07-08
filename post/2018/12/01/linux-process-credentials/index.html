@@ -1,264 +1,58 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noodp" />
-        <title>Linux Process Credentials - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="Linux Process Credentials" />
-<meta property="og:description" content="Process Credentials包含一系列的ID： real user ID &amp; real group ID effective user ID &amp; effective group ID saved set-user-ID &amp; saved set-group-ID file-system user ID &amp; file-system group ID supplementary group IDs real user ID &amp; real group ID real user ID和real gourp ID确" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2018-12-01T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-08-26T23:51:45+08:00" /><meta property="og:site_name" content="My cool site" />
-
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
-
-<meta name="twitter:title" content="Linux Process Credentials"/>
-<meta name="twitter:description" content="Process Credentials包含一系列的ID： real user ID &amp; real group ID effective user ID &amp; effective group ID saved set-user-ID &amp; saved set-group-ID file-system user ID &amp; file-system group ID supplementary group IDs real user ID &amp; real group ID real user ID和real gourp ID确"/>
-<meta name="application-name" content="瘋魔">
-<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" /><link rel="prev" href="https://blog.peven.me/post/2018/11/25/chdir-and-chroot/" /><link rel="next" href="https://blog.peven.me/post/2018/12/04/free-ssl-with-certbot/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
-    {
-        "@context": "http://schema.org",
-        "@type": "BlogPosting",
-        "headline": "Linux Process Credentials",
-        "inLanguage": "zh-CN",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https:\/\/blog.peven.me\/post\/2018\/12\/01\/linux-process-credentials\/"
-        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "Linux","wordcount":  1507 ,
-        "url": "https:\/\/blog.peven.me\/post\/2018\/12\/01\/linux-process-credentials\/","datePublished": "2018-12-01T00:00:00+00:00","dateModified": "2021-08-26T23:51:45+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
-            "@type": "Organization",
-            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
-                "@type": "Person",
-                "name": "Peven"
-            },"description": ""
-    }
-    </script></head>
-    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
-
-        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
-    <div class="header-wrapper">
-        <div class="header-title">
-            <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-        </div>
-        <div class="menu">
-            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2018/12/01/linux-process-credentials/" selected>简体中文</option></select>
-                    </a><span class="menu-item search" id="search-desktop">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-desktop">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</header><header class="mobile" id="header-mobile">
-    <div class="header-container">
-        <div class="header-wrapper">
-            <div class="header-title">
-                <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-            </div>
-            <div class="menu-toggle" id="menu-toggle-mobile">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="menu" id="menu-mobile"><div class="search-wrapper">
-                    <div class="search mobile" id="search-mobile">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-mobile">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
-                        取消
-                    </a>
-                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/post/2018/12/01/linux-process-credentials/" selected>简体中文</option></select>
-                </a></div>
-    </div>
-</header><div class="search-dropdown desktop">
-        <div id="search-dropdown-desktop"></div>
-    </div>
-    <div class="search-dropdown mobile">
-        <div id="search-dropdown-mobile"></div>
-    </div><main class="main">
-                <div class="container"><div class="toc" id="toc-auto">
-            <h2 class="toc-title">目录</h2>
-            <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Linux Process Credentials</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/linux/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>Linux</a>&nbsp;<a href="/categories/%E5%90%8E%E7%AB%AF/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>后端</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2018-12-01">2018-12-01</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 1507 字&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 4 分钟&nbsp;</div>
-        </div><div class="details toc" id="toc-static"  data-kept="">
-                <div class="details-summary toc-title">
-                    <span>目录</span>
-                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
-                </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li>
-          <ul>
-            <li><a href="#real-user-id--real-group-id">real user ID &amp; real group ID</a></li>
-            <li><a href="#effective-user-id--effective-group-id">effective user ID &amp; effective group ID</a></li>
-            <li><a href="#saved-set-user-id--saved-set-group-id">saved set-user-ID &amp; saved set-group-ID</a></li>
-            <li><a href="#file-system-user-id--file-system-group-id">file-system user ID &amp; file-system group ID.</a></li>
-            <li><a href="#supplementary-group-ids">supplementary group IDs</a></li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-  </ul>
-</nav></div>
-            </div><div class="content" id="content"><p>Process Credentials包含一系列的ID：</p>
-<ul>
-<li>real user ID &amp; real group ID</li>
-<li>effective user ID &amp; effective group ID</li>
-<li>saved set-user-ID &amp; saved set-group-ID</li>
-<li>file-system user ID &amp; file-system group ID</li>
-<li>supplementary group IDs</li>
-</ul>
-<h4 id="real-user-id--real-group-id">real user ID &amp; real group ID</h4>
-<p>real user ID和real gourp ID确定了进程所属的用户与组。在登陆过程中（只讨论终端登陆情况），init进程调用getty完成用户名与密码的输入后，login进程会从<code>/etc/passwd</code>文件中读取相应用户密码记录的第三字段（UID）和第四字段（GID），并调用<code>setuid()</code>设定登陆成功后对应Shell进程的real user ID与real group ID。即real user ID（real group ID）用于标识当前用户（组）是谁。
-可使用<code>logname</code>命令获取real user ID：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">┌─<span class="o">[</span>peven@Arch<span class="o">]</span> - <span class="o">[</span>~<span class="o">]</span> - <span class="o">[</span>Sat Dec 01, 16:03<span class="o">]</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">└─<span class="o">[</span>$<span class="o">]</span> &lt;&gt; logname
-</span></span><span class="line"><span class="ln">3</span><span class="cl">peven
-</span></span></code></pre></div><h4 id="effective-user-id--effective-group-id">effective user ID &amp; effective group ID</h4>
-<p>一般而言，effective user ID（effective group ID）是与real user ID（real group ID）相同的，但当我们的程序需要额外的权限去访问他们没有权限访问的资源时，他们就需要将自己的user ID或group ID改为一个具有适当权限的ID（effective user/group ID）。这可以通过调用<code>setuid()</code>，<code>setgid()</code>来实现。
-effective user ID 可以通过<code>whoami</code>命令来查看：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln"> 1</span><span class="cl">┌─<span class="o">[</span>peven@Arch<span class="o">]</span> - <span class="o">[</span>~<span class="o">]</span> - <span class="o">[</span>Sat Dec 01, 16:18<span class="o">]</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">└─<span class="o">[</span>$<span class="o">]</span> &lt;&gt; whoami
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl">peven
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl">┌─<span class="o">[</span>peven@Arch<span class="o">]</span> - <span class="o">[</span>~<span class="o">]</span> - <span class="o">[</span>Sat Dec 01, 16:18<span class="o">]</span>
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">└─<span class="o">[</span>$<span class="o">]</span> &lt;&gt; su <span class="c1">#切换为root用户</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">Password: 
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="o">[</span>root@Arch peven<span class="o">]</span><span class="c1"># logname #可以看到当前Shell的real user ID仍为peven</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">peven
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="o">[</span>root@Arch peven<span class="o">]</span><span class="c1"># whoami #effctive user ID变成了root</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">root
-</span></span></code></pre></div><h4 id="saved-set-user-id--saved-set-group-id">saved set-user-ID &amp; saved set-group-ID</h4>
-<p>在设计程序时，应当遵守最小权限准则，以减少恶意用户试图欺骗我们的程序以非预期的方式使用其特权而损害安全性的可能性。saved set-user-ID（saved set-group-ID）是与set-user-ID（set-group-ID）程序结合使用的。</p>
-<blockquote>
-<p>此名称中的<code>saved</code>保存的实际是effective user ID（effective group ID）。</p>
-<ul>
-<li>若可执行文件的set uid/gid权限位开启（eg. chmod u+s a.out），则将进程的effective user/group ID置为可执行文件的属主。否则，进程的effective user/group ID将保持不变。</li>
-<li>无论可执行文件的set /uid/gid权限位是否开启，saved set-user-ID（saved set-group-ID）对effective user/group ID值的复制都会进行。</li>
-</ul>
-</blockquote>
-<p>比如我们有一个程序，其作用是打印real user ID，effective user ID以及saved set-user-ID:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="cm">/* res.c */</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="cp">#define _GNU_SOURCE        
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="cp"></span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="n">uid_t</span> <span class="n">ruid</span><span class="p">,</span> <span class="n">euid</span><span class="p">,</span> <span class="n">suid</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="n">getresuid</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ruid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">euid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">suid</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;real user ID: %d</span><span class="se">\n</span><span class="s">effective user ID: %d</span><span class="se">\n</span><span class="s">saved set-user-ID: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ruid</span><span class="p">,</span> <span class="n">euid</span><span class="p">,</span> <span class="n">suid</span><span class="p">);</span>
-</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>其权限为：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">-rwxr-xr-x <span class="m">1</span> peven users 17K Dec  <span class="m">1</span> 17:17 res.o
-</span></span></code></pre></div><p>编译运行：</p>
-<ul>
-<li>在未开启<code>set uid/gid</code>权限位时，以普通用户运行：</li>
-</ul>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">real user ID: <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">effective user ID: <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">saved set-user-ID: <span class="m">1000</span>
-</span></span></code></pre></div><p>root用户：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">real user ID: <span class="m">0</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">effective user ID: <span class="m">0</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">saved set-user-ID: <span class="m">0</span>
-</span></span></code></pre></div><ul>
-<li>开启<code>set uid/gid</code>权限位后（chmod u+s res.o），普通用户：</li>
-</ul>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">real user ID: <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">effective user ID: <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">saved set-user-ID: <span class="m">1000</span>
-</span></span></code></pre></div><p>root用户：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">real user ID: <span class="m">0</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">effective user ID: <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">saved set-user-ID: <span class="m">1000</span>
-</span></span></code></pre></div><h4 id="file-system-user-id--file-system-group-id">file-system user ID &amp; file-system group ID.</h4>
-<p>file-system user/group ID始见于Linux1.2版本，当时如果某进程甲的effective user ID等同于某进程乙的real user ID或effective user ID，那么甲就可以向乙发送信号。file-system user/group ID就是为了防范这一风险而生的。不过从Linux2.0版本起，Linux开始在信号发送权限方面遵循SUSv3所强制规定的规则，且这些规则不再涉及目标进程的effective user ID。这样看来，file-system user/group ID在今天已经可以废除了。但为了保持软件的兼容性，还是将其保留了下来。</p>
-<h4 id="supplementary-group-ids">supplementary group IDs</h4>
-<p>supplementary group IDs用于标识进程所属的若干附加的组。supplementary group IDs会配合file-system ID和effective ID来进行进程是否有访问某些资源权限的判定。</p>
-</div><div class="post-footer" id="post-footer">
-    <div class="post-info">
-        <div class="post-info-line">
-            <div class="post-info-mod">
-                <span>更新于 2021-08-26&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/c3203136affb661e6a8e593e46d6cdf76609b934" target="_blank" title="commit by Peven(iampeven@gmail.com) c3203136affb661e6a8e593e46d6cdf76609b934: remove unused files">
-                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>c320313</a></span>
-            </div></div>
-        <div class="post-info-line">
-            <div class="post-info-md"></div>
-            <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" data-title="Linux Process Credentials" data-hashtags="Linux"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" data-hashtag="Linux"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" data-title="Linux Process Credentials"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" data-title="Linux Process Credentials"><i data-svg-src="https://unpkg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2018/12/01/linux-process-credentials/" data-title="Linux Process Credentials"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="post-info-more">
-        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/linux/">Linux</a></section>
-        <section>
-            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
-        </section>
-    </div>
-
-    <div class="post-nav"><a href="/post/2018/11/25/chdir-and-chroot/" class="prev" rel="prev" title="Chdir()与Chroot()"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Chdir()与Chroot()</a>
-            <a href="/post/2018/12/04/free-ssl-with-certbot/" class="next" rel="next" title="使用Certbot签发免费泛域名SSL证书">使用Certbot签发免费泛域名SSL证书<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
-</div>
-</article></div>
-            </main><footer class="footer">
-        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
-                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
-        </div>
-    </footer></div>
-
-        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
-                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
-            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
-                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
-            </a>
-        </div><script type="text/javascript" src="https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
-</html>
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><title>Linux Process Credentials - 瘋魔</title><meta name=Description content="Peven's web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="Linux Process Credentials"><meta property="og:description" content="Process Credentials包含一系列的ID： real user ID & real group ID effective user ID & effective group ID saved set-user-ID & saved set-group-ID file-system user ID & file-system group ID supplementary group IDs real user ID & real group ID real user ID和real gourp ID确"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.peven.me/post/2018/12/01/linux-process-credentials/"><meta property="og:image" content="https://blog.peven.me/logo.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2018-12-01T00:00:00+00:00"><meta property="article:modified_time" content="2022-07-08T23:12:51+08:00"><meta property="og:site_name" content="My cool site"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://blog.peven.me/logo.png"><meta name=twitter:title content="Linux Process Credentials"><meta name=twitter:description content="Process Credentials包含一系列的ID： real user ID & real group ID effective user ID & effective group ID saved set-user-ID & saved set-group-ID file-system user ID & file-system group ID supplementary group IDs real user ID & real group ID real user ID和real gourp ID确"><meta name=application-name content="瘋魔"><meta name=apple-mobile-web-app-title content="瘋魔"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://blog.peven.me/post/2018/12/01/linux-process-credentials/><link rel=prev href=https://blog.peven.me/post/2018/11/25/chdir-and-chroot/><link rel=next href=https://blog.peven.me/post/2018/12/04/free-ssl-with-certbot/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://unpkg.com/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Linux Process Credentials","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/blog.peven.me\/post\/2018\/12\/01\/linux-process-credentials\/"},"image":["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre":"posts","keywords":"Linux","wordcount":1513,"url":"https:\/\/blog.peven.me\/post\/2018\/12\/01\/linux-process-credentials\/","datePublished":"2018-12-01T00:00:00+00:00","dateModified":"2022-07-08T23:12:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Peven","logo":"https:\/\/blog.peven.me\/images\/avatar.jpg"},"author":{"@type":"Person","name":"Peven"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>标签 </a><a class=menu-item href=/categories/>分类 </a><a class=menu-item href=/friends/>友链 </a><a class=menu-item href=/about/>关于 </a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i> </a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i> </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item language" title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select id=language-select-desktop onchange="location=this.value"><option value=/post/2018/12/01/linux-process-credentials/ selected>简体中文</option></select>
+</a><span class="menu-item search" id=search-desktop><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span>
+</span><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题><i class="fas fa-adjust fa-fw" aria-hidden=true></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a class=menu-item href=/posts/ title>所有文章</a><a class=menu-item href=/tags/ title>标签</a><a class=menu-item href=/categories/ title>分类</a><a class=menu-item href=/friends/ title>友链</a><a class=menu-item href=/about/ title>关于</a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i></a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i></a><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题>
+<i class="fas fa-adjust fa-fw" aria-hidden=true></i>
+</a><a href=javascript:void(0); class=menu-item title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select onchange="location=this.value"><option value=/post/2018/12/01/linux-process-credentials/ selected>简体中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目录</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Linux Process Credentials</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=https://blog.peven.me title=Author target=_blank rel="noopener noreffer author" class=author><i class="fas fa-user-circle fa-fw" aria-hidden=true></i>Peven</a></span>&nbsp;<span class=post-category>收录于 <a href=/categories/linux/><i class="far fa-folder fa-fw" aria-hidden=true></i>Linux</a>&nbsp;<a href=/categories/%E5%90%8E%E7%AB%AF/><i class="far fa-folder fa-fw" aria-hidden=true></i>后端</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw" aria-hidden=true></i>&nbsp;<time datetime=2018-12-01>2018-12-01</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden=true></i>&nbsp;约 1513 字&nbsp;
+<i class="far fa-clock fa-fw" aria-hidden=true></i>&nbsp;预计阅读 4 分钟&nbsp;</div></div><div class="details toc" id=toc-static data-kept><div class="details-summary toc-title"><span>目录</span>
+<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><ul><li><a href=#real-user-id--real-group-id>real user ID & real group ID</a></li><li><a href=#effective-user-id--effective-group-id>effective user ID & effective group ID</a></li><li><a href=#saved-set-user-id--saved-set-group-id>saved set-user-ID & saved set-group-ID</a></li><li><a href=#file-system-user-id--file-system-group-id>file-system user ID & file-system group ID.</a></li><li><a href=#supplementary-group-ids>supplementary group IDs</a></li></ul></li></ul></li></ul></nav></div></div><div class=content id=content><p>Process Credentials包含一系列的ID：</p><ul><li>real user ID & real group ID</li><li>effective user ID & effective group ID</li><li>saved set-user-ID & saved set-group-ID</li><li>file-system user ID & file-system group ID</li><li>supplementary group IDs</li></ul><h4 id=real-user-id--real-group-id>real user ID & real group ID</h4><p>real user ID和real gourp ID确定了进程所属的用户与组。在登陆过程中（只讨论终端登陆情况），init进程调用getty完成用户名与密码的输入后，login进程会从<code>/etc/passwd</code>文件中读取相应用户密码记录的第三字段（UID）和第四字段（GID），并调用<code>setuid()</code>设定登陆成功后对应Shell进程的real user ID与real group ID。即real user ID（real group ID）用于标识当前用户（组）是谁。
+可使用<code>logname</code>命令获取real user ID：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>┌─<span class=o>[</span>peven@Arch<span class=o>]</span> - <span class=o>[</span>~<span class=o>]</span> - <span class=o>[</span>Sat Dec 01, 16:03<span class=o>]</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>└─<span class=o>[</span>$<span class=o>]</span> &lt;&gt; logname
+</span></span><span class=line><span class=ln>3</span><span class=cl>peven
+</span></span></code></pre></div><h4 id=effective-user-id--effective-group-id>effective user ID & effective group ID</h4><p>一般而言，effective user ID（effective group ID）是与real user ID（real group ID）相同的，但当我们的程序需要额外的权限去访问他们没有权限访问的资源时，他们就需要将自己的user ID或group ID改为一个具有适当权限的ID（effective user/group ID）。这可以通过调用<code>setuid()</code>，<code>setgid()</code>来实现。
+effective user ID 可以通过<code>whoami</code>命令来查看：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>┌─<span class=o>[</span>peven@Arch<span class=o>]</span> - <span class=o>[</span>~<span class=o>]</span> - <span class=o>[</span>Sat Dec 01, 16:18<span class=o>]</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>└─<span class=o>[</span>$<span class=o>]</span> &lt;&gt; whoami
+</span></span><span class=line><span class=ln> 3</span><span class=cl>peven
+</span></span><span class=line><span class=ln> 4</span><span class=cl>┌─<span class=o>[</span>peven@Arch<span class=o>]</span> - <span class=o>[</span>~<span class=o>]</span> - <span class=o>[</span>Sat Dec 01, 16:18<span class=o>]</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>└─<span class=o>[</span>$<span class=o>]</span> &lt;&gt; su <span class=c1>#切换为root用户</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>Password: 
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=o>[</span>root@Arch peven<span class=o>]</span><span class=c1># logname #可以看到当前Shell的real user ID仍为peven</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>peven
+</span></span><span class=line><span class=ln> 9</span><span class=cl><span class=o>[</span>root@Arch peven<span class=o>]</span><span class=c1># whoami #effctive user ID变成了root</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>root
+</span></span></code></pre></div><h4 id=saved-set-user-id--saved-set-group-id>saved set-user-ID & saved set-group-ID</h4><p>在设计程序时，应当遵守最小权限准则，以减少恶意用户试图欺骗我们的程序以非预期的方式使用其特权而损害安全性的可能性。saved set-user-ID（saved set-group-ID）是与set-user-ID（set-group-ID）程序结合使用的。</p><blockquote><p>此名称中的<code>saved</code>保存的实际是effective user ID（effective group ID）。</p><ul><li>若可执行文件的set uid/gid权限位开启（eg. chmod u+s a.out），则将进程的effective user/group ID置为可执行文件的属主。否则，进程的effective user/group ID将保持不变。</li><li>无论可执行文件的set /uid/gid权限位是否开启，saved set-user-ID（saved set-group-ID）对effective user/group ID值的复制都会进行。</li></ul></blockquote><p>比如我们有一个程序，其作用是打印real user ID，effective user ID以及saved set-user-ID:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/* res.c */</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cp>#define _GNU_SOURCE        
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=cp></span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>        <span class=n>uid_t</span> <span class=n>ruid</span><span class=p>,</span> <span class=n>euid</span><span class=p>,</span> <span class=n>suid</span><span class=p>;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>        <span class=n>getresuid</span><span class=p>(</span><span class=o>&amp;</span><span class=n>ruid</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>euid</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>suid</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;real user ID: %d</span><span class=se>\n</span><span class=s>effective user ID: %d</span><span class=se>\n</span><span class=s>saved set-user-ID: %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>ruid</span><span class=p>,</span> <span class=n>euid</span><span class=p>,</span> <span class=n>suid</span><span class=p>);</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>        <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>其权限为：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>-rwxr-xr-x <span class=m>1</span> peven users 17K Dec  <span class=m>1</span> 17:17 res.o
+</span></span></code></pre></div><p>编译运行：</p><ul><li>在未开启<code>set uid/gid</code>权限位时，以普通用户运行：</li></ul><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>real user ID: <span class=m>1000</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>effective user ID: <span class=m>1000</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>saved set-user-ID: <span class=m>1000</span>
+</span></span></code></pre></div><p>root用户：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>real user ID: <span class=m>0</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>effective user ID: <span class=m>0</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>saved set-user-ID: <span class=m>0</span>
+</span></span></code></pre></div><ul><li>开启<code>set uid/gid</code>权限位后（chmod u+s res.o），普通用户：</li></ul><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>real user ID: <span class=m>1000</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>effective user ID: <span class=m>1000</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>saved set-user-ID: <span class=m>1000</span>
+</span></span></code></pre></div><p>root用户：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>real user ID: <span class=m>0</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>effective user ID: <span class=m>1000</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>saved set-user-ID: <span class=m>1000</span>
+</span></span></code></pre></div><h4 id=file-system-user-id--file-system-group-id>file-system user ID & file-system group ID.</h4><p>file-system user/group ID始见于Linux1.2版本，当时如果某进程甲的effective user ID等同于某进程乙的real user ID或effective user ID，那么甲就可以向乙发送信号。file-system user/group ID就是为了防范这一风险而生的。不过从Linux2.0版本起，Linux开始在信号发送权限方面遵循SUSv3所强制规定的规则，且这些规则不再涉及目标进程的effective user ID。这样看来，file-system user/group ID在今天已经可以废除了。但为了保持软件的兼容性，还是将其保留了下来。</p><h4 id=supplementary-group-ids>supplementary group IDs</h4><p>supplementary group IDs用于标识进程所属的若干附加的组。supplementary group IDs会配合file-system ID和effective ID来进行进程是否有访问某些资源权限的判定。</p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-08&nbsp;<a class=git-hash href=https://github.com/phoon/phoon.github.io/commit/e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6 target=_blank title="commit by PevenPhoon(iampeven@gmail.com) e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6: action add clone theme">
+<i class="fas fa-hashtag fa-fw" aria-hidden=true></i>e8ee37b</a></span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://blog.peven.me/post/2018/12/01/linux-process-credentials/ data-title="Linux Process Credentials" data-hashtags=Linux><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://blog.peven.me/post/2018/12/01/linux-process-credentials/ data-hashtag=Linux><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Hacker News" data-sharer=hackernews data-url=https://blog.peven.me/post/2018/12/01/linux-process-credentials/ data-title="Linux Process Credentials"><i class="fab fa-hacker-news fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Line" data-sharer=line data-url=https://blog.peven.me/post/2018/12/01/linux-process-credentials/ data-title="Linux Process Credentials"><i data-svg-src=https://unpkg.com/simple-icons@7.0.0/icons/line.svg aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 微博" data-sharer=weibo data-url=https://blog.peven.me/post/2018/12/01/linux-process-credentials/ data-title="Linux Process Credentials"><i class="fab fa-weibo fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/linux/>Linux</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主页</a></span></section></div><div class=post-nav><a href=/post/2018/11/25/chdir-and-chroot/ class=prev rel=prev title=Chdir()与Chroot()><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>Chdir()与Chroot()</a>
+<a href=/post/2018/12/04/free-ssl-with-certbot/ class=next rel=next title=使用Certbot签发免费泛域名SSL证书>使用Certbot签发免费泛域名SSL证书<i class="fas fa-angle-right fa-fw" aria-hidden=true></i></a></div></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line>由 <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.101.0">Hugo</a> 强力驱动 | 主题 - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden=true></i> LoveIt</a></div><div class=footer-line itemscope itemtype=http://schema.org/CreativeWork><i class="far fa-copyright fa-fw" aria-hidden=true></i><span itemprop=copyrightYear>2018 - 2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=https://blog.peven.me target=_blank>Peven</a></span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw" aria-hidden=true></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw" aria-hidden=true></i></a></div><script type=text/javascript src=https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://unpkg.com/lunr@2.3.9/lunr.min.js></script><script type=text/javascript src=/lib/lunr/lunr.stemmer.support.min.js></script><script type=text/javascript src=/lib/lunr/lunr.zh.min.js></script><script type=text/javascript src=https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js></script><script type=text/javascript src=https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js></script><script type=text/javascript src=https://unpkg.com/sharer.js@0.5.1/sharer.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:40},comment:{},search:{highlightTag:"em",lunrIndexURL:"/index.json",lunrLanguageCode:"zh",lunrSegmentitURL:"/lib/lunr/lunr.segmentit.js",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"lunr"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

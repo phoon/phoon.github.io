@@ -1,394 +1,190 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noodp" />
-        <title>RabbitMQ初涉以及Golang实践 - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="RabbitMQ初涉以及Golang实践" />
-<meta property="og:description" content="在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2019-02-03T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-08-26T23:51:45+08:00" /><meta property="og:site_name" content="My cool site" />
-
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
-
-<meta name="twitter:title" content="RabbitMQ初涉以及Golang实践"/>
-<meta name="twitter:description" content="在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取"/>
-<meta name="application-name" content="瘋魔">
-<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" /><link rel="prev" href="https://blog.peven.me/post/2019/02/01/golang-range-pointer-problem/" /><link rel="next" href="https://blog.peven.me/post/2019/03/09/working-with-mysql-in-golang/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
-    {
-        "@context": "http://schema.org",
-        "@type": "BlogPosting",
-        "headline": "RabbitMQ初涉以及Golang实践",
-        "inLanguage": "zh-CN",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https:\/\/blog.peven.me\/post\/2019\/02\/03\/learn-rabbitmq-with-golang\/"
-        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "Golang, RabbitMQ","wordcount":  1285 ,
-        "url": "https:\/\/blog.peven.me\/post\/2019\/02\/03\/learn-rabbitmq-with-golang\/","datePublished": "2019-02-03T00:00:00+00:00","dateModified": "2021-08-26T23:51:45+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
-            "@type": "Organization",
-            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
-                "@type": "Person",
-                "name": "Peven"
-            },"description": ""
-    }
-    </script></head>
-    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
-
-        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
-    <div class="header-wrapper">
-        <div class="header-title">
-            <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-        </div>
-        <div class="menu">
-            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2019/02/03/learn-rabbitmq-with-golang/" selected>简体中文</option></select>
-                    </a><span class="menu-item search" id="search-desktop">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-desktop">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</header><header class="mobile" id="header-mobile">
-    <div class="header-container">
-        <div class="header-wrapper">
-            <div class="header-title">
-                <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-            </div>
-            <div class="menu-toggle" id="menu-toggle-mobile">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="menu" id="menu-mobile"><div class="search-wrapper">
-                    <div class="search mobile" id="search-mobile">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-mobile">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
-                        取消
-                    </a>
-                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/post/2019/02/03/learn-rabbitmq-with-golang/" selected>简体中文</option></select>
-                </a></div>
-    </div>
-</header><div class="search-dropdown desktop">
-        <div id="search-dropdown-desktop"></div>
-    </div>
-    <div class="search-dropdown mobile">
-        <div id="search-dropdown-mobile"></div>
-    </div><main class="main">
-                <div class="container"><div class="toc" id="toc-auto">
-            <h2 class="toc-title">目录</h2>
-            <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">RabbitMQ初涉以及Golang实践</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/golang/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>Golang</a>&nbsp;<a href="/categories/%E5%90%8E%E7%AB%AF/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>后端</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2019-02-03">2019-02-03</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 1285 字&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 3 分钟&nbsp;</div>
-        </div><div class="details toc" id="toc-static"  data-kept="">
-                <div class="details-summary toc-title">
-                    <span>目录</span>
-                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
-                </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li>
-          <ul>
-            <li><a href="#安装rabbitmq">安装RabbitMQ</a></li>
-            <li><a href="#golang使用rabbitmq">Golang使用RabbitMQ</a></li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-  </ul>
-</nav></div>
-            </div><div class="content" id="content"><p>在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取数据，这样做的目的是为了降低生产者与消费者之间的耦合性，同时也平衡了两者的不对等的处理能力。</p>
-<p>为了达到上述目的，还可以考虑采用消息中间件。由此也引出我们今天的主题：<code>RabbitMQ</code>。<code>RabbitMQ</code>实现了<code>AMQP</code> <code>(Advanced Message Queue Protocol)</code>协议，是目前广泛使用的消息中间件之一。</p>
-<p><code>RabbitMQ</code>中有几个重要的概念：</p>
-<ul>
-<li>
-<p><code>Queue</code>： 消息队列，是<code>RabbitMQ</code>的核心</p>
-</li>
-<li>
-<p><code>Binding</code>： 绑定，<code>Exchange</code>通过与<code>Queue</code>绑定并为每个<code>Queue</code>设置<code>Routing Key</code>从而达到路由功能</p>
-</li>
-<li>
-<p><code>Channel</code>： 消息通道，每一个<code>Channel</code>代表一个客户端会话任务</p>
-</li>
-<li>
-<p><code>Exchange</code>： 交换器，制定消息传递的规则，选择路由</p>
-</li>
-<li>
-<p><code>Routing Key：</code> 路由关键字，<code>Exchange</code>根据此项选择投递消息到哪个<code>Queue</code></p>
-</li>
-<li>
-<p><code>Virtual Host</code>： 虚拟机，用于隔离用户权限</p>
-</li>
-</ul>
-<h4 id="安装rabbitmq">安装RabbitMQ</h4>
-<p><code>Archlinux</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">sudo pacman -S rabbitmq
-</span></span></code></pre></div><p>安装完成之后，启动<code>RabbitMQ</code>：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">sudo systemctl start rabbitmq.service
-</span></span></code></pre></div><p>此时，<code>RabbitMQ</code>就开始运行了，默认只采用<code>AMQP</code>协议。如果想使用网页来管理服务器，可以激活对应的插件：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">sudo rabbitmq-lugins <span class="nb">enable</span> rabbitmq_management
-</span></span></code></pre></div><p><code>AMQP</code>协议的端口为<code>5672</code>，网页管理台端口为<code>15672</code>，默认用户名和密码均为<code>guest</code>(记得改密码！)</p>
-<p>再将<code>RabbitMQ</code>重启一下：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">sudo systemctl restart rabbitmq.service
-</span></span></code></pre></div><p>新建用户和虚拟机：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">//新建一个用户
-</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo rabbitmqctl add_user username password 
-</span></span><span class="line"><span class="ln">3</span><span class="cl">//新建一个虚拟机
-</span></span><span class="line"><span class="ln">4</span><span class="cl">sudo rabbitmqctl add_vhost NewHost
-</span></span><span class="line"><span class="ln">5</span><span class="cl">//设置用户角色
-</span></span><span class="line"><span class="ln">6</span><span class="cl">sudo rabbitmqctl set_user_tags username monitoring
-</span></span><span class="line"><span class="ln">7</span><span class="cl">//设置 /NewHost对于用户username可用
-</span></span><span class="line"><span class="ln">8</span><span class="cl">sudo rabbitmqctl set_permissions -p NewHost username &#34;.*&#34; &#34;.*&#34; &#34;.*&#34;
-</span></span></code></pre></div><h4 id="golang使用rabbitmq">Golang使用RabbitMQ</h4>
-<p>想要通过<code>Golang</code>来使用<code>RabbitMQ（AMQP协议版）</code>,需要下载<code>AMQP</code>库：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">go get github.com/streadway/amqp
-</span></span></code></pre></div><p>然后编写<code>producer.go</code>与<code>consumer.go</code>两个程序：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="cm">/*
-</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="cm">	producer.go
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="cm">	Author: Peven
-</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="cm">*/</span>
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="kn">import</span> <span class="p">(</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">	<span class="s">&#34;log&#34;</span>
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">
-</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="s">&#34;github.com/streadway/amqp&#34;</span>
-</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">)</span>
-</span></span><span class="line"><span class="ln">12</span><span class="cl">
-</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">14</span><span class="cl">	<span class="c1">//start a new amqp connection
-</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="c1"></span>	<span class="nx">conn</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">amqp</span><span class="p">.</span><span class="nf">Dial</span><span class="p">(</span><span class="s">&#34;amqp://username:password@localhost:5672/NewHost&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">16</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">17</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">18</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">19</span><span class="cl">	<span class="k">defer</span> <span class="nx">conn</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">20</span><span class="cl">
-</span></span><span class="line"><span class="ln">21</span><span class="cl">	<span class="c1">//declare a channel
-</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="c1"></span>	<span class="nx">ch</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">conn</span><span class="p">.</span><span class="nf">Channel</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">23</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">24</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">25</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">26</span><span class="cl">	<span class="k">defer</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">27</span><span class="cl">
-</span></span><span class="line"><span class="ln">28</span><span class="cl">	<span class="c1">//declare a queue
-</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="c1"></span>	<span class="nx">queue</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">QueueDeclare</span><span class="p">(</span>
-</span></span><span class="line"><span class="ln">30</span><span class="cl">		<span class="s">&#34;TestQueue&#34;</span><span class="p">,</span> <span class="c1">//queue name
-</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="c1"></span>		<span class="kc">true</span><span class="p">,</span>        <span class="c1">//durable
-</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>       <span class="c1">//auto-delete when unused
-</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>       <span class="c1">//exclusive
-</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>       <span class="c1">//no-wait
-</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="c1"></span>		<span class="kc">nil</span><span class="p">,</span>         <span class="c1">//args
-</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="c1"></span>	<span class="p">)</span>
-</span></span><span class="line"><span class="ln">37</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">38</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">39</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">40</span><span class="cl">
-</span></span><span class="line"><span class="ln">41</span><span class="cl">	<span class="c1">//declare a exchange
-</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="c1"></span>	<span class="nx">err</span> <span class="p">=</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">ExchangeDeclare</span><span class="p">(</span>
-</span></span><span class="line"><span class="ln">43</span><span class="cl">		<span class="s">&#34;TestExchange&#34;</span><span class="p">,</span> <span class="c1">//exchange name
-</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="c1"></span>		<span class="s">&#34;direct&#34;</span><span class="p">,</span>       <span class="c1">//type
-</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="c1"></span>		<span class="kc">true</span><span class="p">,</span>           <span class="c1">//durable
-</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>          <span class="c1">//auto-delete when unused
-</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>          <span class="c1">//internal
-</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>          <span class="c1">//no-wait
-</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="c1"></span>		<span class="kc">nil</span><span class="p">,</span>            <span class="c1">//args
-</span></span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="c1"></span>	<span class="p">)</span>
-</span></span><span class="line"><span class="ln">51</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">52</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">53</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">54</span><span class="cl">
-</span></span><span class="line"><span class="ln">55</span><span class="cl">	<span class="c1">//binding a queue
-</span></span></span><span class="line"><span class="ln">56</span><span class="cl"><span class="c1"></span>	<span class="nx">err</span> <span class="p">=</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">QueueBind</span><span class="p">(</span>
-</span></span><span class="line"><span class="ln">57</span><span class="cl">		<span class="nx">queue</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span>     <span class="c1">//queue name
-</span></span></span><span class="line"><span class="ln">58</span><span class="cl"><span class="c1"></span>		<span class="s">&#34;routing_key&#34;</span><span class="p">,</span>  <span class="c1">//routing key
-</span></span></span><span class="line"><span class="ln">59</span><span class="cl"><span class="c1"></span>		<span class="s">&#34;TestExchange&#34;</span><span class="p">,</span> <span class="c1">//exhchange name
-</span></span></span><span class="line"><span class="ln">60</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>          <span class="c1">//no-wait
-</span></span></span><span class="line"><span class="ln">61</span><span class="cl"><span class="c1"></span>		<span class="kc">nil</span><span class="p">,</span>            <span class="c1">//args
-</span></span></span><span class="line"><span class="ln">62</span><span class="cl"><span class="c1"></span>	<span class="p">)</span>
-</span></span><span class="line"><span class="ln">63</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">64</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="s">&#34;1:&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">65</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">66</span><span class="cl">
-</span></span><span class="line"><span class="ln">67</span><span class="cl">	<span class="c1">//publish a message
-</span></span></span><span class="line"><span class="ln">68</span><span class="cl"><span class="c1"></span>	<span class="nx">err</span> <span class="p">=</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">Publish</span><span class="p">(</span>
-</span></span><span class="line"><span class="ln">69</span><span class="cl">		<span class="s">&#34;TestExchange&#34;</span><span class="p">,</span> <span class="c1">//exchange name
-</span></span></span><span class="line"><span class="ln">70</span><span class="cl"><span class="c1"></span>		<span class="s">&#34;routing_key&#34;</span><span class="p">,</span>  <span class="c1">//routing key
-</span></span></span><span class="line"><span class="ln">71</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>          <span class="c1">//mandatory
-</span></span></span><span class="line"><span class="ln">72</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>          <span class="c1">//immediate
-</span></span></span><span class="line"><span class="ln">73</span><span class="cl"><span class="c1"></span>		<span class="nx">amqp</span><span class="p">.</span><span class="nx">Publishing</span><span class="p">{</span>
-</span></span><span class="line"><span class="ln">74</span><span class="cl">			<span class="nx">ContentType</span><span class="p">:</span> <span class="s">&#34;text/plain&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="ln">75</span><span class="cl">			<span class="nx">Body</span><span class="p">:</span>        <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&#34;This is a message&#34;</span><span class="p">),</span>
-</span></span><span class="line"><span class="ln">76</span><span class="cl">		<span class="p">},</span>
-</span></span><span class="line"><span class="ln">77</span><span class="cl">	<span class="p">)</span>
-</span></span><span class="line"><span class="ln">78</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">79</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">80</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">81</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="cm">/*
-</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="cm">	consumer.go
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="cm">	Author: Peven
-</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="cm">*/</span>
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="kn">import</span> <span class="p">(</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">	<span class="s">&#34;fmt&#34;</span>
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">	<span class="s">&#34;log&#34;</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="s">&#34;sync&#34;</span>
-</span></span><span class="line"><span class="ln">11</span><span class="cl">
-</span></span><span class="line"><span class="ln">12</span><span class="cl">	<span class="s">&#34;github.com/streadway/amqp&#34;</span>
-</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="p">)</span>
-</span></span><span class="line"><span class="ln">14</span><span class="cl">
-</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="c1">//start a new amqp connection
-</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="c1"></span>	<span class="nx">conn</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">amqp</span><span class="p">.</span><span class="nf">Dial</span><span class="p">(</span><span class="s">&#34;amqp://username:password@localhost:5672/NewHost&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">18</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">19</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">20</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">21</span><span class="cl">	<span class="k">defer</span> <span class="nx">conn</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">22</span><span class="cl">	
-</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="c1">//declare a channel
-</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="c1"></span>	<span class="nx">ch</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">conn</span><span class="p">.</span><span class="nf">Channel</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">25</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">26</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">27</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">28</span><span class="cl">	<span class="k">defer</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">29</span><span class="cl">	
-</span></span><span class="line"><span class="ln">30</span><span class="cl">    <span class="c1">//declare a queue
-</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="c1"></span>	<span class="nx">queue</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">QueueDeclare</span><span class="p">(</span>
-</span></span><span class="line"><span class="ln">32</span><span class="cl">		<span class="s">&#34;TestQueue&#34;</span><span class="p">,</span> <span class="c1">//queue name
-</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="c1"></span>		<span class="kc">true</span><span class="p">,</span>        <span class="c1">//durable
-</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>       <span class="c1">//auto-delete when unused
-</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>       <span class="c1">//exclusive
-</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>       <span class="c1">//no-wait
-</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="c1"></span>		<span class="kc">nil</span><span class="p">,</span>         <span class="c1">//args
-</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="c1"></span>	<span class="p">)</span>
-</span></span><span class="line"><span class="ln">39</span><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">40</span><span class="cl">		<span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">41</span><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="ln">42</span><span class="cl">	
-</span></span><span class="line"><span class="ln">43</span><span class="cl">    <span class="c1">//get the delivery results
-</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="c1"></span>	<span class="nx">msgs</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ch</span><span class="p">.</span><span class="nf">Consume</span><span class="p">(</span>
-</span></span><span class="line"><span class="ln">45</span><span class="cl">		<span class="nx">queue</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="c1">// queue name
-</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="c1"></span>		<span class="s">&#34;peven&#34;</span><span class="p">,</span>    <span class="c1">// consumer name
-</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="c1"></span>		<span class="kc">true</span><span class="p">,</span>       <span class="c1">// auto-ack
-</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>      <span class="c1">// exclusive
-</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>      <span class="c1">// no-local
-</span></span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="c1"></span>		<span class="kc">false</span><span class="p">,</span>      <span class="c1">// no-wait
-</span></span></span><span class="line"><span class="ln">51</span><span class="cl"><span class="c1"></span>		<span class="kc">nil</span><span class="p">,</span>        <span class="c1">// args
-</span></span></span><span class="line"><span class="ln">52</span><span class="cl"><span class="c1"></span>	<span class="p">)</span>
-</span></span><span class="line"><span class="ln">53</span><span class="cl">	
-</span></span><span class="line"><span class="ln">54</span><span class="cl">	<span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
-</span></span><span class="line"><span class="ln">55</span><span class="cl">	<span class="nx">wg</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">56</span><span class="cl">	<span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">57</span><span class="cl">		<span class="k">for</span> <span class="nx">m</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">msgs</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">58</span><span class="cl">			<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Receive a message: &#34;</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">Body</span><span class="p">))</span>
-</span></span><span class="line"><span class="ln">59</span><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="ln">60</span><span class="cl">	<span class="p">}()</span>
-</span></span><span class="line"><span class="ln">61</span><span class="cl">	<span class="nx">wg</span><span class="p">.</span><span class="nf">Done</span><span class="p">()</span>
-</span></span><span class="line"><span class="ln">62</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>运行完<code>producer</code>之后，打开终端输入以下命令查看<code>Exchange</code>：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">sudo rabbitmqctl list_exchanges -p NewHost
-</span></span></code></pre></div><p>输出如下：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln"> 1</span><span class="cl">Listing exchanges <span class="k">for</span> vhost NewHost ...
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">name    		<span class="nb">type</span>
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl">amq.topic       	topic
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl">amq.direct      	direct
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">TestExchange    	direct	//新创建的交换器
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">amq.fanout      	fanout
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl">amq.rabbitmq.trace  	topic
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">amq.match       	headers
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">amq.headers     	headers
-</span></span><span class="line"><span class="ln">10</span><span class="cl">        		direct	//默认路由，<span class="s2">&#34;&#34;</span>
-</span></span></code></pre></div><p>输入<code>sudo rabbitctl list_bindings -p NewHost </code>查看建立的绑定：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">$ sudo rabbitmqctl list_bindings -p NewHost --no-table-headers
-</span></span><span class="line"><span class="ln">2</span><span class="cl">
-</span></span><span class="line"><span class="ln">3</span><span class="cl">Listing bindings <span class="k">for</span> vhost NewHost...
-</span></span><span class="line"><span class="ln">4</span><span class="cl">        exchange        TestQueue       queue   TestQueue       <span class="o">[]</span>
-</span></span><span class="line"><span class="ln">5</span><span class="cl">TestExchange    exchange        TestQueue       queue   routing_key     <span class="o">[]</span>
-</span></span></code></pre></div><p>同时，运行<code>consumer</code>也打印出了<code>producer</code>发送的消息。</p>
-</div><div class="post-footer" id="post-footer">
-    <div class="post-info">
-        <div class="post-info-line">
-            <div class="post-info-mod">
-                <span>更新于 2021-08-26&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/c3203136affb661e6a8e593e46d6cdf76609b934" target="_blank" title="commit by Peven(iampeven@gmail.com) c3203136affb661e6a8e593e46d6cdf76609b934: remove unused files">
-                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>c320313</a></span>
-            </div></div>
-        <div class="post-info-line">
-            <div class="post-info-md"></div>
-            <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" data-title="RabbitMQ初涉以及Golang实践" data-hashtags="Golang,RabbitMQ"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" data-hashtag="Golang"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" data-title="RabbitMQ初涉以及Golang实践"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" data-title="RabbitMQ初涉以及Golang实践"><i data-svg-src="https://unpkg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/" data-title="RabbitMQ初涉以及Golang实践"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="post-info-more">
-        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/golang/">Golang</a>,&nbsp;<a href="/tags/rabbitmq/">RabbitMQ</a></section>
-        <section>
-            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
-        </section>
-    </div>
-
-    <div class="post-nav"><a href="/post/2019/02/01/golang-range-pointer-problem/" class="prev" rel="prev" title="Golang中range指针数据的坑"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Golang中range指针数据的坑</a>
-            <a href="/post/2019/03/09/working-with-mysql-in-golang/" class="next" rel="next" title="在Golang中对MySQL进行操作">在Golang中对MySQL进行操作<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
-</div>
-</article></div>
-            </main><footer class="footer">
-        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
-                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
-        </div>
-    </footer></div>
-
-        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
-                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
-            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
-                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
-            </a>
-        </div><script type="text/javascript" src="https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
-</html>
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><title>RabbitMQ初涉以及Golang实践 - 瘋魔</title><meta name=Description content="Peven's web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="RabbitMQ初涉以及Golang实践"><meta property="og:description" content="在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/"><meta property="og:image" content="https://blog.peven.me/logo.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-02-03T00:00:00+00:00"><meta property="article:modified_time" content="2022-07-08T23:12:51+08:00"><meta property="og:site_name" content="My cool site"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://blog.peven.me/logo.png"><meta name=twitter:title content="RabbitMQ初涉以及Golang实践"><meta name=twitter:description content="在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取"><meta name=application-name content="瘋魔"><meta name=apple-mobile-web-app-title content="瘋魔"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/><link rel=prev href=https://blog.peven.me/post/2019/02/01/golang-range-pointer-problem/><link rel=next href=https://blog.peven.me/post/2019/03/09/working-with-mysql-in-golang/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://unpkg.com/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"RabbitMQ初涉以及Golang实践","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/blog.peven.me\/post\/2019\/02\/03\/learn-rabbitmq-with-golang\/"},"image":["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre":"posts","keywords":"Golang, RabbitMQ","wordcount":1372,"url":"https:\/\/blog.peven.me\/post\/2019\/02\/03\/learn-rabbitmq-with-golang\/","datePublished":"2019-02-03T00:00:00+00:00","dateModified":"2022-07-08T23:12:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Peven","logo":"https:\/\/blog.peven.me\/images\/avatar.jpg"},"author":{"@type":"Person","name":"Peven"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>标签 </a><a class=menu-item href=/categories/>分类 </a><a class=menu-item href=/friends/>友链 </a><a class=menu-item href=/about/>关于 </a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i> </a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i> </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item language" title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select id=language-select-desktop onchange="location=this.value"><option value=/post/2019/02/03/learn-rabbitmq-with-golang/ selected>简体中文</option></select>
+</a><span class="menu-item search" id=search-desktop><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span>
+</span><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题><i class="fas fa-adjust fa-fw" aria-hidden=true></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a class=menu-item href=/posts/ title>所有文章</a><a class=menu-item href=/tags/ title>标签</a><a class=menu-item href=/categories/ title>分类</a><a class=menu-item href=/friends/ title>友链</a><a class=menu-item href=/about/ title>关于</a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i></a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i></a><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题>
+<i class="fas fa-adjust fa-fw" aria-hidden=true></i>
+</a><a href=javascript:void(0); class=menu-item title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select onchange="location=this.value"><option value=/post/2019/02/03/learn-rabbitmq-with-golang/ selected>简体中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目录</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">RabbitMQ初涉以及Golang实践</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=https://blog.peven.me title=Author target=_blank rel="noopener noreffer author" class=author><i class="fas fa-user-circle fa-fw" aria-hidden=true></i>Peven</a></span>&nbsp;<span class=post-category>收录于 <a href=/categories/golang/><i class="far fa-folder fa-fw" aria-hidden=true></i>Golang</a>&nbsp;<a href=/categories/%E5%90%8E%E7%AB%AF/><i class="far fa-folder fa-fw" aria-hidden=true></i>后端</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw" aria-hidden=true></i>&nbsp;<time datetime=2019-02-03>2019-02-03</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden=true></i>&nbsp;约 1372 字&nbsp;
+<i class="far fa-clock fa-fw" aria-hidden=true></i>&nbsp;预计阅读 3 分钟&nbsp;</div></div><div class="details toc" id=toc-static data-kept><div class="details-summary toc-title"><span>目录</span>
+<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><ul><li><ul><li><a href=#安装rabbitmq>安装RabbitMQ</a></li><li><a href=#golang使用rabbitmq>Golang使用RabbitMQ</a></li></ul></li></ul></li></ul></nav></div></div><div class=content id=content><p>在并发编程中，多线程并发协作时采用生产者消费者模式是一个良好的解决方案。生产者线程将生成的数据放入一个阻塞队列中，消费者则直接从该队列中获取数据，这样做的目的是为了降低生产者与消费者之间的耦合性，同时也平衡了两者的不对等的处理能力。</p><p>为了达到上述目的，还可以考虑采用消息中间件。由此也引出我们今天的主题：<code>RabbitMQ</code>。<code>RabbitMQ</code>实现了<code>AMQP</code> <code>(Advanced Message Queue Protocol)</code>协议，是目前广泛使用的消息中间件之一。</p><p><code>RabbitMQ</code>中有几个重要的概念：</p><ul><li><p><code>Queue</code>： 消息队列，是<code>RabbitMQ</code>的核心</p></li><li><p><code>Binding</code>： 绑定，<code>Exchange</code>通过与<code>Queue</code>绑定并为每个<code>Queue</code>设置<code>Routing Key</code>从而达到路由功能</p></li><li><p><code>Channel</code>： 消息通道，每一个<code>Channel</code>代表一个客户端会话任务</p></li><li><p><code>Exchange</code>： 交换器，制定消息传递的规则，选择路由</p></li><li><p><code>Routing Key：</code> 路由关键字，<code>Exchange</code>根据此项选择投递消息到哪个<code>Queue</code></p></li><li><p><code>Virtual Host</code>： 虚拟机，用于隔离用户权限</p></li></ul><h4 id=安装rabbitmq>安装RabbitMQ</h4><p><code>Archlinux</code>:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>sudo pacman -S rabbitmq
+</span></span></code></pre></div><p>安装完成之后，启动<code>RabbitMQ</code>：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>sudo systemctl start rabbitmq.service
+</span></span></code></pre></div><p>此时，<code>RabbitMQ</code>就开始运行了，默认只采用<code>AMQP</code>协议。如果想使用网页来管理服务器，可以激活对应的插件：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>sudo rabbitmq-lugins <span class=nb>enable</span> rabbitmq_management
+</span></span></code></pre></div><p><code>AMQP</code>协议的端口为<code>5672</code>，网页管理台端口为<code>15672</code>，默认用户名和密码均为<code>guest</code>(记得改密码！)</p><p>再将<code>RabbitMQ</code>重启一下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>sudo systemctl restart rabbitmq.service
+</span></span></code></pre></div><p>新建用户和虚拟机：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=ln>1</span><span class=cl>//新建一个用户
+</span></span><span class=line><span class=ln>2</span><span class=cl>sudo rabbitmqctl add_user username password 
+</span></span><span class=line><span class=ln>3</span><span class=cl>//新建一个虚拟机
+</span></span><span class=line><span class=ln>4</span><span class=cl>sudo rabbitmqctl add_vhost NewHost
+</span></span><span class=line><span class=ln>5</span><span class=cl>//设置用户角色
+</span></span><span class=line><span class=ln>6</span><span class=cl>sudo rabbitmqctl set_user_tags username monitoring
+</span></span><span class=line><span class=ln>7</span><span class=cl>//设置 /NewHost对于用户username可用
+</span></span><span class=line><span class=ln>8</span><span class=cl>sudo rabbitmqctl set_permissions -p NewHost username &#34;.*&#34; &#34;.*&#34; &#34;.*&#34;
+</span></span></code></pre></div><h4 id=golang使用rabbitmq>Golang使用RabbitMQ</h4><p>想要通过<code>Golang</code>来使用<code>RabbitMQ（AMQP协议版）</code>,需要下载<code>AMQP</code>库：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>go get github.com/streadway/amqp
+</span></span></code></pre></div><p>然后编写<code>producer.go</code>与<code>consumer.go</code>两个程序：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>	producer.go
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	Author: Peven
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=kn>package</span> <span class=nx>main</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=kn>import</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>	<span class=s>&#34;log&#34;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=s>&#34;github.com/streadway/amqp&#34;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=p>)</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=kd>func</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=c1>//start a new amqp connection
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1></span>	<span class=nx>conn</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>amqp</span><span class=p>.</span><span class=nf>Dial</span><span class=p>(</span><span class=s>&#34;amqp://username:password@localhost:5672/NewHost&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>17</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>	<span class=k>defer</span> <span class=nx>conn</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>
+</span></span><span class=line><span class=ln>21</span><span class=cl>	<span class=c1>//declare a channel
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=c1></span>	<span class=nx>ch</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>conn</span><span class=p>.</span><span class=nf>Channel</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>23</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>24</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>	<span class=k>defer</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>
+</span></span><span class=line><span class=ln>28</span><span class=cl>	<span class=c1>//declare a queue
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=c1></span>	<span class=nx>queue</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>QueueDeclare</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>30</span><span class=cl>		<span class=s>&#34;TestQueue&#34;</span><span class=p>,</span> <span class=c1>//queue name
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=c1></span>		<span class=kc>true</span><span class=p>,</span>        <span class=c1>//durable
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>       <span class=c1>//auto-delete when unused
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>       <span class=c1>//exclusive
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>       <span class=c1>//no-wait
+</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=c1></span>		<span class=kc>nil</span><span class=p>,</span>         <span class=c1>//args
+</span></span></span><span class=line><span class=ln>36</span><span class=cl><span class=c1></span>	<span class=p>)</span>
+</span></span><span class=line><span class=ln>37</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>38</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>39</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>40</span><span class=cl>
+</span></span><span class=line><span class=ln>41</span><span class=cl>	<span class=c1>//declare a exchange
+</span></span></span><span class=line><span class=ln>42</span><span class=cl><span class=c1></span>	<span class=nx>err</span> <span class=p>=</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>ExchangeDeclare</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>43</span><span class=cl>		<span class=s>&#34;TestExchange&#34;</span><span class=p>,</span> <span class=c1>//exchange name
+</span></span></span><span class=line><span class=ln>44</span><span class=cl><span class=c1></span>		<span class=s>&#34;direct&#34;</span><span class=p>,</span>       <span class=c1>//type
+</span></span></span><span class=line><span class=ln>45</span><span class=cl><span class=c1></span>		<span class=kc>true</span><span class=p>,</span>           <span class=c1>//durable
+</span></span></span><span class=line><span class=ln>46</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>          <span class=c1>//auto-delete when unused
+</span></span></span><span class=line><span class=ln>47</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>          <span class=c1>//internal
+</span></span></span><span class=line><span class=ln>48</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>          <span class=c1>//no-wait
+</span></span></span><span class=line><span class=ln>49</span><span class=cl><span class=c1></span>		<span class=kc>nil</span><span class=p>,</span>            <span class=c1>//args
+</span></span></span><span class=line><span class=ln>50</span><span class=cl><span class=c1></span>	<span class=p>)</span>
+</span></span><span class=line><span class=ln>51</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>52</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>53</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>54</span><span class=cl>
+</span></span><span class=line><span class=ln>55</span><span class=cl>	<span class=c1>//binding a queue
+</span></span></span><span class=line><span class=ln>56</span><span class=cl><span class=c1></span>	<span class=nx>err</span> <span class=p>=</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>QueueBind</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>57</span><span class=cl>		<span class=nx>queue</span><span class=p>.</span><span class=nx>Name</span><span class=p>,</span>     <span class=c1>//queue name
+</span></span></span><span class=line><span class=ln>58</span><span class=cl><span class=c1></span>		<span class=s>&#34;routing_key&#34;</span><span class=p>,</span>  <span class=c1>//routing key
+</span></span></span><span class=line><span class=ln>59</span><span class=cl><span class=c1></span>		<span class=s>&#34;TestExchange&#34;</span><span class=p>,</span> <span class=c1>//exhchange name
+</span></span></span><span class=line><span class=ln>60</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>          <span class=c1>//no-wait
+</span></span></span><span class=line><span class=ln>61</span><span class=cl><span class=c1></span>		<span class=kc>nil</span><span class=p>,</span>            <span class=c1>//args
+</span></span></span><span class=line><span class=ln>62</span><span class=cl><span class=c1></span>	<span class=p>)</span>
+</span></span><span class=line><span class=ln>63</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>64</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=s>&#34;1:&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>65</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>66</span><span class=cl>
+</span></span><span class=line><span class=ln>67</span><span class=cl>	<span class=c1>//publish a message
+</span></span></span><span class=line><span class=ln>68</span><span class=cl><span class=c1></span>	<span class=nx>err</span> <span class=p>=</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>Publish</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>69</span><span class=cl>		<span class=s>&#34;TestExchange&#34;</span><span class=p>,</span> <span class=c1>//exchange name
+</span></span></span><span class=line><span class=ln>70</span><span class=cl><span class=c1></span>		<span class=s>&#34;routing_key&#34;</span><span class=p>,</span>  <span class=c1>//routing key
+</span></span></span><span class=line><span class=ln>71</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>          <span class=c1>//mandatory
+</span></span></span><span class=line><span class=ln>72</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>          <span class=c1>//immediate
+</span></span></span><span class=line><span class=ln>73</span><span class=cl><span class=c1></span>		<span class=nx>amqp</span><span class=p>.</span><span class=nx>Publishing</span><span class=p>{</span>
+</span></span><span class=line><span class=ln>74</span><span class=cl>			<span class=nx>ContentType</span><span class=p>:</span> <span class=s>&#34;text/plain&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=ln>75</span><span class=cl>			<span class=nx>Body</span><span class=p>:</span>        <span class=p>[]</span><span class=nb>byte</span><span class=p>(</span><span class=s>&#34;This is a message&#34;</span><span class=p>),</span>
+</span></span><span class=line><span class=ln>76</span><span class=cl>		<span class=p>},</span>
+</span></span><span class=line><span class=ln>77</span><span class=cl>	<span class=p>)</span>
+</span></span><span class=line><span class=ln>78</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>79</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>80</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>81</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=ln> 1</span><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=cm>	consumer.go
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=cm>	Author: Peven
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=cm>*/</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl><span class=kn>package</span> <span class=nx>main</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>
+</span></span><span class=line><span class=ln> 7</span><span class=cl><span class=kn>import</span> <span class=p>(</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>	<span class=s>&#34;fmt&#34;</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>	<span class=s>&#34;log&#34;</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=s>&#34;sync&#34;</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>
+</span></span><span class=line><span class=ln>12</span><span class=cl>	<span class=s>&#34;github.com/streadway/amqp&#34;</span>
+</span></span><span class=line><span class=ln>13</span><span class=cl><span class=p>)</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>
+</span></span><span class=line><span class=ln>15</span><span class=cl><span class=kd>func</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>    <span class=c1>//start a new amqp connection
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>	<span class=nx>conn</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>amqp</span><span class=p>.</span><span class=nf>Dial</span><span class=p>(</span><span class=s>&#34;amqp://username:password@localhost:5672/NewHost&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>19</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>20</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>	<span class=k>defer</span> <span class=nx>conn</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>22</span><span class=cl>	
+</span></span><span class=line><span class=ln>23</span><span class=cl>    <span class=c1>//declare a channel
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=c1></span>	<span class=nx>ch</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>conn</span><span class=p>.</span><span class=nf>Channel</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>25</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>28</span><span class=cl>	<span class=k>defer</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>29</span><span class=cl>	
+</span></span><span class=line><span class=ln>30</span><span class=cl>    <span class=c1>//declare a queue
+</span></span></span><span class=line><span class=ln>31</span><span class=cl><span class=c1></span>	<span class=nx>queue</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>QueueDeclare</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>32</span><span class=cl>		<span class=s>&#34;TestQueue&#34;</span><span class=p>,</span> <span class=c1>//queue name
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=c1></span>		<span class=kc>true</span><span class=p>,</span>        <span class=c1>//durable
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>       <span class=c1>//auto-delete when unused
+</span></span></span><span class=line><span class=ln>35</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>       <span class=c1>//exclusive
+</span></span></span><span class=line><span class=ln>36</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>       <span class=c1>//no-wait
+</span></span></span><span class=line><span class=ln>37</span><span class=cl><span class=c1></span>		<span class=kc>nil</span><span class=p>,</span>         <span class=c1>//args
+</span></span></span><span class=line><span class=ln>38</span><span class=cl><span class=c1></span>	<span class=p>)</span>
+</span></span><span class=line><span class=ln>39</span><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>40</span><span class=cl>		<span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>41</span><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=ln>42</span><span class=cl>	
+</span></span><span class=line><span class=ln>43</span><span class=cl>    <span class=c1>//get the delivery results
+</span></span></span><span class=line><span class=ln>44</span><span class=cl><span class=c1></span>	<span class=nx>msgs</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>ch</span><span class=p>.</span><span class=nf>Consume</span><span class=p>(</span>
+</span></span><span class=line><span class=ln>45</span><span class=cl>		<span class=nx>queue</span><span class=p>.</span><span class=nx>Name</span><span class=p>,</span> <span class=c1>// queue name
+</span></span></span><span class=line><span class=ln>46</span><span class=cl><span class=c1></span>		<span class=s>&#34;peven&#34;</span><span class=p>,</span>    <span class=c1>// consumer name
+</span></span></span><span class=line><span class=ln>47</span><span class=cl><span class=c1></span>		<span class=kc>true</span><span class=p>,</span>       <span class=c1>// auto-ack
+</span></span></span><span class=line><span class=ln>48</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>      <span class=c1>// exclusive
+</span></span></span><span class=line><span class=ln>49</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>      <span class=c1>// no-local
+</span></span></span><span class=line><span class=ln>50</span><span class=cl><span class=c1></span>		<span class=kc>false</span><span class=p>,</span>      <span class=c1>// no-wait
+</span></span></span><span class=line><span class=ln>51</span><span class=cl><span class=c1></span>		<span class=kc>nil</span><span class=p>,</span>        <span class=c1>// args
+</span></span></span><span class=line><span class=ln>52</span><span class=cl><span class=c1></span>	<span class=p>)</span>
+</span></span><span class=line><span class=ln>53</span><span class=cl>	
+</span></span><span class=line><span class=ln>54</span><span class=cl>	<span class=kd>var</span> <span class=nx>wg</span> <span class=nx>sync</span><span class=p>.</span><span class=nx>WaitGroup</span>
+</span></span><span class=line><span class=ln>55</span><span class=cl>	<span class=nx>wg</span><span class=p>.</span><span class=nf>Add</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>56</span><span class=cl>	<span class=k>go</span> <span class=kd>func</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>57</span><span class=cl>		<span class=k>for</span> <span class=nx>m</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>msgs</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>58</span><span class=cl>			<span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=s>&#34;Receive a message: &#34;</span><span class=p>,</span> <span class=nb>string</span><span class=p>(</span><span class=nx>m</span><span class=p>.</span><span class=nx>Body</span><span class=p>))</span>
+</span></span><span class=line><span class=ln>59</span><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=ln>60</span><span class=cl>	<span class=p>}()</span>
+</span></span><span class=line><span class=ln>61</span><span class=cl>	<span class=nx>wg</span><span class=p>.</span><span class=nf>Done</span><span class=p>()</span>
+</span></span><span class=line><span class=ln>62</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>运行完<code>producer</code>之后，打开终端输入以下命令查看<code>Exchange</code>：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>sudo rabbitmqctl list_exchanges -p NewHost
+</span></span></code></pre></div><p>输出如下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl>Listing exchanges <span class=k>for</span> vhost NewHost ...
+</span></span><span class=line><span class=ln> 2</span><span class=cl>name    		<span class=nb>type</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>amq.topic       	topic
+</span></span><span class=line><span class=ln> 4</span><span class=cl>amq.direct      	direct
+</span></span><span class=line><span class=ln> 5</span><span class=cl>TestExchange    	direct	//新创建的交换器
+</span></span><span class=line><span class=ln> 6</span><span class=cl>amq.fanout      	fanout
+</span></span><span class=line><span class=ln> 7</span><span class=cl>amq.rabbitmq.trace  	topic
+</span></span><span class=line><span class=ln> 8</span><span class=cl>amq.match       	headers
+</span></span><span class=line><span class=ln> 9</span><span class=cl>amq.headers     	headers
+</span></span><span class=line><span class=ln>10</span><span class=cl>        		direct	//默认路由，<span class=s2>&#34;&#34;</span>
+</span></span></code></pre></div><p>输入<code>sudo rabbitctl list_bindings -p NewHost </code>查看建立的绑定：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>$ sudo rabbitmqctl list_bindings -p NewHost --no-table-headers
+</span></span><span class=line><span class=ln>2</span><span class=cl>
+</span></span><span class=line><span class=ln>3</span><span class=cl>Listing bindings <span class=k>for</span> vhost NewHost...
+</span></span><span class=line><span class=ln>4</span><span class=cl>        exchange        TestQueue       queue   TestQueue       <span class=o>[]</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>TestExchange    exchange        TestQueue       queue   routing_key     <span class=o>[]</span>
+</span></span></code></pre></div><p>同时，运行<code>consumer</code>也打印出了<code>producer</code>发送的消息。</p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-08&nbsp;<a class=git-hash href=https://github.com/phoon/phoon.github.io/commit/e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6 target=_blank title="commit by PevenPhoon(iampeven@gmail.com) e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6: action add clone theme">
+<i class="fas fa-hashtag fa-fw" aria-hidden=true></i>e8ee37b</a></span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/ data-title=RabbitMQ初涉以及Golang实践 data-hashtags=Golang,RabbitMQ><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/ data-hashtag=Golang><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Hacker News" data-sharer=hackernews data-url=https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/ data-title=RabbitMQ初涉以及Golang实践><i class="fab fa-hacker-news fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Line" data-sharer=line data-url=https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/ data-title=RabbitMQ初涉以及Golang实践><i data-svg-src=https://unpkg.com/simple-icons@7.0.0/icons/line.svg aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 微博" data-sharer=weibo data-url=https://blog.peven.me/post/2019/02/03/learn-rabbitmq-with-golang/ data-title=RabbitMQ初涉以及Golang实践><i class="fab fa-weibo fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/golang/>Golang</a>,&nbsp;<a href=/tags/rabbitmq/>RabbitMQ</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主页</a></span></section></div><div class=post-nav><a href=/post/2019/02/01/golang-range-pointer-problem/ class=prev rel=prev title=Golang中range指针数据的坑><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>Golang中range指针数据的坑</a>
+<a href=/post/2019/03/09/working-with-mysql-in-golang/ class=next rel=next title=在Golang中对MySQL进行操作>在Golang中对MySQL进行操作<i class="fas fa-angle-right fa-fw" aria-hidden=true></i></a></div></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line>由 <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.101.0">Hugo</a> 强力驱动 | 主题 - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden=true></i> LoveIt</a></div><div class=footer-line itemscope itemtype=http://schema.org/CreativeWork><i class="far fa-copyright fa-fw" aria-hidden=true></i><span itemprop=copyrightYear>2018 - 2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=https://blog.peven.me target=_blank>Peven</a></span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw" aria-hidden=true></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw" aria-hidden=true></i></a></div><script type=text/javascript src=https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://unpkg.com/lunr@2.3.9/lunr.min.js></script><script type=text/javascript src=/lib/lunr/lunr.stemmer.support.min.js></script><script type=text/javascript src=/lib/lunr/lunr.zh.min.js></script><script type=text/javascript src=https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js></script><script type=text/javascript src=https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js></script><script type=text/javascript src=https://unpkg.com/sharer.js@0.5.1/sharer.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:40},comment:{},search:{highlightTag:"em",lunrIndexURL:"/index.json",lunrLanguageCode:"zh",lunrSegmentitURL:"/lib/lunr/lunr.segmentit.js",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"lunr"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

@@ -1,246 +1,45 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noodp" />
-        <title>替换云服务器操作系统为Archlinux - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="替换云服务器操作系统为Archlinux" />
-<meta property="og:description" content="操作环境： 支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云） Ubuntu 16.04 服务器 准备工作 对于不支持DHCP的厂商，需要我们自己去手动配置服务" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2018-12-07T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-08-26T23:51:45+08:00" /><meta property="og:site_name" content="My cool site" />
-
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
-
-<meta name="twitter:title" content="替换云服务器操作系统为Archlinux"/>
-<meta name="twitter:description" content="操作环境： 支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云） Ubuntu 16.04 服务器 准备工作 对于不支持DHCP的厂商，需要我们自己去手动配置服务"/>
-<meta name="application-name" content="瘋魔">
-<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" /><link rel="prev" href="https://blog.peven.me/post/2018/12/04/free-ssl-with-certbot/" /><link rel="next" href="https://blog.peven.me/post/2019/02/01/golang-range-pointer-problem/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
-    {
-        "@context": "http://schema.org",
-        "@type": "BlogPosting",
-        "headline": "替换云服务器操作系统为Archlinux",
-        "inLanguage": "zh-CN",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https:\/\/blog.peven.me\/post\/2018\/12\/07\/replace-server-os-with-archlinux\/"
-        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "Archlinux","wordcount":  863 ,
-        "url": "https:\/\/blog.peven.me\/post\/2018\/12\/07\/replace-server-os-with-archlinux\/","datePublished": "2018-12-07T00:00:00+00:00","dateModified": "2021-08-26T23:51:45+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
-            "@type": "Organization",
-            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
-                "@type": "Person",
-                "name": "Peven"
-            },"description": ""
-    }
-    </script></head>
-    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
-
-        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
-    <div class="header-wrapper">
-        <div class="header-title">
-            <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-        </div>
-        <div class="menu">
-            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2018/12/07/replace-server-os-with-archlinux/" selected>简体中文</option></select>
-                    </a><span class="menu-item search" id="search-desktop">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-desktop">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</header><header class="mobile" id="header-mobile">
-    <div class="header-container">
-        <div class="header-wrapper">
-            <div class="header-title">
-                <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-            </div>
-            <div class="menu-toggle" id="menu-toggle-mobile">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="menu" id="menu-mobile"><div class="search-wrapper">
-                    <div class="search mobile" id="search-mobile">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-mobile">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
-                        取消
-                    </a>
-                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/post/2018/12/07/replace-server-os-with-archlinux/" selected>简体中文</option></select>
-                </a></div>
-    </div>
-</header><div class="search-dropdown desktop">
-        <div id="search-dropdown-desktop"></div>
-    </div>
-    <div class="search-dropdown mobile">
-        <div id="search-dropdown-mobile"></div>
-    </div><main class="main">
-                <div class="container"><div class="toc" id="toc-auto">
-            <h2 class="toc-title">目录</h2>
-            <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">替换云服务器操作系统为Archlinux</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/%E6%8A%98%E8%85%BE/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>折腾</a>&nbsp;<a href="/categories/linux/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>Linux</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2018-12-07">2018-12-07</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 863 字&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 2 分钟&nbsp;</div>
-        </div><div class="details toc" id="toc-static"  data-kept="">
-                <div class="details-summary toc-title">
-                    <span>目录</span>
-                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
-                </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
-  <ul>
-    <li><a href="#准备工作">准备工作</a></li>
-    <li><a href="#开始安装">开始安装</a>
-      <ul>
-        <li><a href="#下载镜像">下载镜像</a></li>
-        <li><a href="#查看磁盘信息">查看磁盘信息</a></li>
-        <li><a href="#引导iso文件">引导iso文件</a></li>
-        <li><a href="#安装archlinux">安装Archlinux</a></li>
-        <li><a href="#联网">联网</a></li>
-      </ul>
-    </li>
-    <li><a href="#reference">Reference</a></li>
-  </ul>
-</nav></div>
-            </div><div class="content" id="content"><p>操作环境：</p>
-<blockquote>
-<ul>
-<li>支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云）</li>
-<li>Ubuntu 16.04 服务器</li>
-</ul>
-</blockquote>
-<h2 id="准备工作">准备工作</h2>
-<p>对于不支持DHCP的厂商，需要我们自己去手动配置服务器的内网IP地址:
-使用<code>ip addr</code>命令获取IP地址信息并记录下来，在搞完事情后需要我们根据这些信息手动设置服务器IP。在这里假设我的IP地址<code>172.18.65.234/18</code>，其对应的网关地址为<code>172.18.64.1</code>。</p>
-<h2 id="开始安装">开始安装</h2>
-<h3 id="下载镜像">下载镜像</h3>
-<p>下载最新archlinux镜像到根目录下：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">root@Ali:~# <span class="nb">cd</span>   /
-</span></span><span class="line"><span class="ln">2</span><span class="cl">root@Ali:/# wget https://mirrors.tuna.tsinghua.edu.cn/archlinux/iso/latest/archlinux-2018.12.01-x86_64.iso
-</span></span></code></pre></div><h3 id="查看磁盘信息">查看磁盘信息</h3>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">root@Ali:/# lsblk
-</span></span><span class="line"><span class="ln">2</span><span class="cl">NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
-</span></span><span class="line"><span class="ln">3</span><span class="cl">vda    254:0    <span class="m">0</span>  40G  <span class="m">0</span> disk 
-</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="sb">`</span>-vda1 254:1    <span class="m">0</span>  40G  <span class="m">0</span> part /
-</span></span></code></pre></div><h3 id="引导iso文件">引导iso文件</h3>
-<p>在Ubuntu里编辑/boot/grub/grub.cfg文件，添加下列内容：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">#timeout设为60,是为了VNC连接时有足够时间选择启动项，若为第一启动项，可不设置</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nb">set</span> <span class="nv">timeout</span><span class="o">=</span><span class="m">60</span>
-</span></span><span class="line"><span class="ln"> 3</span><span class="cl">menuentry <span class="s1">&#39;ArchISO&#39;</span> --class iso <span class="o">{</span>
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl">  <span class="nb">set</span> <span class="nv">isofile</span><span class="o">=</span>/archlinux-2018.12.01-x86_64.iso
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">  loopback loop0 <span class="nv">$isofile</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  <span class="c1">#archisolabel设置archiso文件驻留的文件系统标签。</span>
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  <span class="c1">#img_dev指明archiso文件驻留的设备</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">  <span class="c1">#img_loop是archiso文件在img_dev里的绝对位置</span>
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">  linux <span class="o">(</span>loop0<span class="o">)</span>/arch/boot/x86_64/vmlinuz <span class="nv">archisolabel</span><span class="o">=</span>ARCH20181201 <span class="nv">img_dev</span><span class="o">=</span>/dev/vda1 <span class="nv">img_loop</span><span class="o">=</span><span class="nv">$isofile</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">  initrd <span class="o">(</span>loop0<span class="o">)</span>/arch/boot/x86_64/archiso.img
-</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="o">}</span>
-</span></span></code></pre></div><p>然后重启，同时在浏览器里以VNC方式连接到服务器，在GRUB启动菜单里选择ArchISO进入。</p>
-<h3 id="安装archlinux">安装Archlinux</h3>
-<p>进入Archlinux Live环境后，使用<code>lsblk</code>命令，你会发现我们的目标磁盘<code>/dev/vda1</code>被挂载到了<code>/run/archiso/img_dev</code>目录下。清楚了这一点后，就可以按照ArchWiki的介绍开始安装ArchLinux了，只需将步骤里的<code>/mnt</code>换为<code>/run/archiso/img_dev</code>即可。<em>有可能需要<code>mount -o remount,rw /run/archiso/img_dev</code></em>。</p>
-<h3 id="联网">联网</h3>
-<p>安装完成后，重启进入系统（浏览器VNC登录状态），使用<code>ip link</code>命令查看设备，使用<code>ip addr add ip地址 dev 设备</code>设置IP,使用<code>ip route add default via 网关 dev 设备</code>配置网关地址。</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">root@arch:~# ip link <span class="c1">#查看设备</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="m">65536</span> qdisc noqueue state UNKNOWN mode DEFAULT group default qlen <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-</span></span><span class="line"><span class="ln">4</span><span class="cl">2: ens3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="m">1500</span> qdisc fq_codel state UP mode DEFAULT group default qlen <span class="m">1000</span>
-</span></span><span class="line"><span class="ln">5</span><span class="cl">    link/ether 00:16:3e:0e:e4:6b brd ff:ff:ff:ff:ff:ff
-</span></span><span class="line"><span class="ln">6</span><span class="cl">root@arch:~# ip link <span class="nb">set</span> ens3 up
-</span></span><span class="line"><span class="ln">7</span><span class="cl">root@arch:~# ip addr add 172.18.65.234/18 dev ens3
-</span></span><span class="line"><span class="ln">8</span><span class="cl">root@arch:~# ip route add default via 172.18.64.1 dev ens3
-</span></span><span class="line"><span class="ln">9</span><span class="cl">root@arch:~# <span class="nb">echo</span> <span class="s1">&#39;nameserver 8.8.8.8&#39;</span> &gt; /etc/resolv.conf
-</span></span></code></pre></div><p>大功告成！</p>
-<h2 id="reference">Reference</h2>
-<ul>
-<li>
-<p>README.bootparams <a href="https://git.archlinux.org/archiso.git/tree/docs/README.bootparams" target="_blank" rel="noopener noreffer">https://git.archlinux.org/archiso.git/tree/docs/README.bootparams</a></p>
-</li>
-<li>
-<p>GUN GRUB Manual <a href="https://www.gnu.org/software/grub/manual/grub/grub.html" target="_blank" rel="noopener noreffer">https://www.gnu.org/software/grub/manual/grub/grub.html</a></p>
-</li>
-<li>
-<p>Multiboot USB drive - ArchWiki <a href="https://wiki.archlinux.org/index.php/Multiboot_USB_drive#Arch_Linux_monthly_release" target="_blank" rel="noopener noreffer">https://wiki.archlinux.org/index.php/Multiboot_USB_drive#Arch_Linux_monthly_release</a></p>
-</li>
-</ul>
-</div><div class="post-footer" id="post-footer">
-    <div class="post-info">
-        <div class="post-info-line">
-            <div class="post-info-mod">
-                <span>更新于 2021-08-26&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/c3203136affb661e6a8e593e46d6cdf76609b934" target="_blank" title="commit by Peven(iampeven@gmail.com) c3203136affb661e6a8e593e46d6cdf76609b934: remove unused files">
-                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>c320313</a></span>
-            </div></div>
-        <div class="post-info-line">
-            <div class="post-info-md"></div>
-            <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" data-title="替换云服务器操作系统为Archlinux" data-hashtags="Archlinux"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" data-hashtag="Archlinux"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" data-title="替换云服务器操作系统为Archlinux"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" data-title="替换云服务器操作系统为Archlinux"><i data-svg-src="https://unpkg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/" data-title="替换云服务器操作系统为Archlinux"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="post-info-more">
-        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/archlinux/">Archlinux</a></section>
-        <section>
-            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
-        </section>
-    </div>
-
-    <div class="post-nav"><a href="/post/2018/12/04/free-ssl-with-certbot/" class="prev" rel="prev" title="使用Certbot签发免费泛域名SSL证书"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>使用Certbot签发免费泛域名SSL证书</a>
-            <a href="/post/2019/02/01/golang-range-pointer-problem/" class="next" rel="next" title="Golang中range指针数据的坑">Golang中range指针数据的坑<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
-</div>
-</article></div>
-            </main><footer class="footer">
-        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
-                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
-        </div>
-    </footer></div>
-
-        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
-                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
-            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
-                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
-            </a>
-        </div><script type="text/javascript" src="https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
-</html>
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><title>替换云服务器操作系统为Archlinux - 瘋魔</title><meta name=Description content="Peven's web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="替换云服务器操作系统为Archlinux"><meta property="og:description" content="操作环境： 支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云） Ubuntu 16.04 服务器 准备工作 对于不支持DHCP的厂商，需要我们自己去手动配置服务"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/"><meta property="og:image" content="https://blog.peven.me/logo.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2018-12-07T00:00:00+00:00"><meta property="article:modified_time" content="2022-07-08T23:12:51+08:00"><meta property="og:site_name" content="My cool site"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://blog.peven.me/logo.png"><meta name=twitter:title content="替换云服务器操作系统为Archlinux"><meta name=twitter:description content="操作环境： 支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云） Ubuntu 16.04 服务器 准备工作 对于不支持DHCP的厂商，需要我们自己去手动配置服务"><meta name=application-name content="瘋魔"><meta name=apple-mobile-web-app-title content="瘋魔"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/><link rel=prev href=https://blog.peven.me/post/2018/12/04/free-ssl-with-certbot/><link rel=next href=https://blog.peven.me/post/2019/02/01/golang-range-pointer-problem/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://unpkg.com/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"替换云服务器操作系统为Archlinux","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/blog.peven.me\/post\/2018\/12\/07\/replace-server-os-with-archlinux\/"},"image":["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre":"posts","keywords":"Archlinux","wordcount":869,"url":"https:\/\/blog.peven.me\/post\/2018\/12\/07\/replace-server-os-with-archlinux\/","datePublished":"2018-12-07T00:00:00+00:00","dateModified":"2022-07-08T23:12:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Peven","logo":"https:\/\/blog.peven.me\/images\/avatar.jpg"},"author":{"@type":"Person","name":"Peven"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>标签 </a><a class=menu-item href=/categories/>分类 </a><a class=menu-item href=/friends/>友链 </a><a class=menu-item href=/about/>关于 </a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i> </a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i> </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item language" title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select id=language-select-desktop onchange="location=this.value"><option value=/post/2018/12/07/replace-server-os-with-archlinux/ selected>简体中文</option></select>
+</a><span class="menu-item search" id=search-desktop><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span>
+</span><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题><i class="fas fa-adjust fa-fw" aria-hidden=true></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a class=menu-item href=/posts/ title>所有文章</a><a class=menu-item href=/tags/ title>标签</a><a class=menu-item href=/categories/ title>分类</a><a class=menu-item href=/friends/ title>友链</a><a class=menu-item href=/about/ title>关于</a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i></a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i></a><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题>
+<i class="fas fa-adjust fa-fw" aria-hidden=true></i>
+</a><a href=javascript:void(0); class=menu-item title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select onchange="location=this.value"><option value=/post/2018/12/07/replace-server-os-with-archlinux/ selected>简体中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目录</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">替换云服务器操作系统为Archlinux</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=https://blog.peven.me title=Author target=_blank rel="noopener noreffer author" class=author><i class="fas fa-user-circle fa-fw" aria-hidden=true></i>Peven</a></span>&nbsp;<span class=post-category>收录于 <a href=/categories/%E6%8A%98%E8%85%BE/><i class="far fa-folder fa-fw" aria-hidden=true></i>折腾</a>&nbsp;<a href=/categories/linux/><i class="far fa-folder fa-fw" aria-hidden=true></i>Linux</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw" aria-hidden=true></i>&nbsp;<time datetime=2018-12-07>2018-12-07</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden=true></i>&nbsp;约 869 字&nbsp;
+<i class="far fa-clock fa-fw" aria-hidden=true></i>&nbsp;预计阅读 2 分钟&nbsp;</div></div><div class="details toc" id=toc-static data-kept><div class="details-summary toc-title"><span>目录</span>
+<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#准备工作>准备工作</a></li><li><a href=#开始安装>开始安装</a><ul><li><a href=#下载镜像>下载镜像</a></li><li><a href=#查看磁盘信息>查看磁盘信息</a></li><li><a href=#引导iso文件>引导iso文件</a></li><li><a href=#安装archlinux>安装Archlinux</a></li><li><a href=#联网>联网</a></li></ul></li><li><a href=#reference>Reference</a></li></ul></nav></div></div><div class=content id=content><p>操作环境：</p><blockquote><ul><li>支持浏览器VNC方式登录的云服务商（e.g. 阿里云、腾讯云）</li><li>Ubuntu 16.04 服务器</li></ul></blockquote><h2 id=准备工作>准备工作</h2><p>对于不支持DHCP的厂商，需要我们自己去手动配置服务器的内网IP地址:
+使用<code>ip addr</code>命令获取IP地址信息并记录下来，在搞完事情后需要我们根据这些信息手动设置服务器IP。在这里假设我的IP地址<code>172.18.65.234/18</code>，其对应的网关地址为<code>172.18.64.1</code>。</p><h2 id=开始安装>开始安装</h2><h3 id=下载镜像>下载镜像</h3><p>下载最新archlinux镜像到根目录下：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>root@Ali:~# <span class=nb>cd</span>   /
+</span></span><span class=line><span class=ln>2</span><span class=cl>root@Ali:/# wget https://mirrors.tuna.tsinghua.edu.cn/archlinux/iso/latest/archlinux-2018.12.01-x86_64.iso
+</span></span></code></pre></div><h3 id=查看磁盘信息>查看磁盘信息</h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>root@Ali:/# lsblk
+</span></span><span class=line><span class=ln>2</span><span class=cl>NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+</span></span><span class=line><span class=ln>3</span><span class=cl>vda    254:0    <span class=m>0</span>  40G  <span class=m>0</span> disk 
+</span></span><span class=line><span class=ln>4</span><span class=cl><span class=sb>`</span>-vda1 254:1    <span class=m>0</span>  40G  <span class=m>0</span> part /
+</span></span></code></pre></div><h3 id=引导iso文件>引导iso文件</h3><p>在Ubuntu里编辑/boot/grub/grub.cfg文件，添加下列内容：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln> 1</span><span class=cl><span class=c1>#timeout设为60,是为了VNC连接时有足够时间选择启动项，若为第一启动项，可不设置</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl><span class=nb>set</span> <span class=nv>timeout</span><span class=o>=</span><span class=m>60</span>
+</span></span><span class=line><span class=ln> 3</span><span class=cl>menuentry <span class=s1>&#39;ArchISO&#39;</span> --class iso <span class=o>{</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>  <span class=nb>set</span> <span class=nv>isofile</span><span class=o>=</span>/archlinux-2018.12.01-x86_64.iso
+</span></span><span class=line><span class=ln> 5</span><span class=cl>  loopback loop0 <span class=nv>$isofile</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>  <span class=c1>#archisolabel设置archiso文件驻留的文件系统标签。</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>  <span class=c1>#img_dev指明archiso文件驻留的设备</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>  <span class=c1>#img_loop是archiso文件在img_dev里的绝对位置</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>  linux <span class=o>(</span>loop0<span class=o>)</span>/arch/boot/x86_64/vmlinuz <span class=nv>archisolabel</span><span class=o>=</span>ARCH20181201 <span class=nv>img_dev</span><span class=o>=</span>/dev/vda1 <span class=nv>img_loop</span><span class=o>=</span><span class=nv>$isofile</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>  initrd <span class=o>(</span>loop0<span class=o>)</span>/arch/boot/x86_64/archiso.img
+</span></span><span class=line><span class=ln>11</span><span class=cl><span class=o>}</span>
+</span></span></code></pre></div><p>然后重启，同时在浏览器里以VNC方式连接到服务器，在GRUB启动菜单里选择ArchISO进入。</p><h3 id=安装archlinux>安装Archlinux</h3><p>进入Archlinux Live环境后，使用<code>lsblk</code>命令，你会发现我们的目标磁盘<code>/dev/vda1</code>被挂载到了<code>/run/archiso/img_dev</code>目录下。清楚了这一点后，就可以按照ArchWiki的介绍开始安装ArchLinux了，只需将步骤里的<code>/mnt</code>换为<code>/run/archiso/img_dev</code>即可。<em>有可能需要<code>mount -o remount,rw /run/archiso/img_dev</code></em>。</p><h3 id=联网>联网</h3><p>安装完成后，重启进入系统（浏览器VNC登录状态），使用<code>ip link</code>命令查看设备，使用<code>ip addr add ip地址 dev 设备</code>设置IP,使用<code>ip route add default via 网关 dev 设备</code>配置网关地址。</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=ln>1</span><span class=cl>root@arch:~# ip link <span class=c1>#查看设备</span>
+</span></span><span class=line><span class=ln>2</span><span class=cl>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class=m>65536</span> qdisc noqueue state UNKNOWN mode DEFAULT group default qlen <span class=m>1000</span>
+</span></span><span class=line><span class=ln>3</span><span class=cl>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span class=line><span class=ln>4</span><span class=cl>2: ens3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class=m>1500</span> qdisc fq_codel state UP mode DEFAULT group default qlen <span class=m>1000</span>
+</span></span><span class=line><span class=ln>5</span><span class=cl>    link/ether 00:16:3e:0e:e4:6b brd ff:ff:ff:ff:ff:ff
+</span></span><span class=line><span class=ln>6</span><span class=cl>root@arch:~# ip link <span class=nb>set</span> ens3 up
+</span></span><span class=line><span class=ln>7</span><span class=cl>root@arch:~# ip addr add 172.18.65.234/18 dev ens3
+</span></span><span class=line><span class=ln>8</span><span class=cl>root@arch:~# ip route add default via 172.18.64.1 dev ens3
+</span></span><span class=line><span class=ln>9</span><span class=cl>root@arch:~# <span class=nb>echo</span> <span class=s1>&#39;nameserver 8.8.8.8&#39;</span> &gt; /etc/resolv.conf
+</span></span></code></pre></div><p>大功告成！</p><h2 id=reference>Reference</h2><ul><li><p>README.bootparams <a href=https://git.archlinux.org/archiso.git/tree/docs/README.bootparams target=_blank rel="noopener noreffer">https://git.archlinux.org/archiso.git/tree/docs/README.bootparams</a></p></li><li><p>GUN GRUB Manual <a href=https://www.gnu.org/software/grub/manual/grub/grub.html target=_blank rel="noopener noreffer">https://www.gnu.org/software/grub/manual/grub/grub.html</a></p></li><li><p>Multiboot USB drive - ArchWiki <a href=https://wiki.archlinux.org/index.php/Multiboot_USB_drive#Arch_Linux_monthly_release target=_blank rel="noopener noreffer">https://wiki.archlinux.org/index.php/Multiboot_USB_drive#Arch_Linux_monthly_release</a></p></li></ul></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-08&nbsp;<a class=git-hash href=https://github.com/phoon/phoon.github.io/commit/e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6 target=_blank title="commit by PevenPhoon(iampeven@gmail.com) e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6: action add clone theme">
+<i class="fas fa-hashtag fa-fw" aria-hidden=true></i>e8ee37b</a></span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/ data-title=替换云服务器操作系统为Archlinux data-hashtags=Archlinux><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/ data-hashtag=Archlinux><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Hacker News" data-sharer=hackernews data-url=https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/ data-title=替换云服务器操作系统为Archlinux><i class="fab fa-hacker-news fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Line" data-sharer=line data-url=https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/ data-title=替换云服务器操作系统为Archlinux><i data-svg-src=https://unpkg.com/simple-icons@7.0.0/icons/line.svg aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 微博" data-sharer=weibo data-url=https://blog.peven.me/post/2018/12/07/replace-server-os-with-archlinux/ data-title=替换云服务器操作系统为Archlinux><i class="fab fa-weibo fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/archlinux/>Archlinux</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主页</a></span></section></div><div class=post-nav><a href=/post/2018/12/04/free-ssl-with-certbot/ class=prev rel=prev title=使用Certbot签发免费泛域名SSL证书><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>使用Certbot签发免费泛域名SSL证书</a>
+<a href=/post/2019/02/01/golang-range-pointer-problem/ class=next rel=next title=Golang中range指针数据的坑>Golang中range指针数据的坑<i class="fas fa-angle-right fa-fw" aria-hidden=true></i></a></div></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line>由 <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.101.0">Hugo</a> 强力驱动 | 主题 - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden=true></i> LoveIt</a></div><div class=footer-line itemscope itemtype=http://schema.org/CreativeWork><i class="far fa-copyright fa-fw" aria-hidden=true></i><span itemprop=copyrightYear>2018 - 2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=https://blog.peven.me target=_blank>Peven</a></span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw" aria-hidden=true></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw" aria-hidden=true></i></a></div><script type=text/javascript src=https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://unpkg.com/lunr@2.3.9/lunr.min.js></script><script type=text/javascript src=/lib/lunr/lunr.stemmer.support.min.js></script><script type=text/javascript src=/lib/lunr/lunr.zh.min.js></script><script type=text/javascript src=https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js></script><script type=text/javascript src=https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js></script><script type=text/javascript src=https://unpkg.com/sharer.js@0.5.1/sharer.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:40},comment:{},search:{highlightTag:"em",lunrIndexURL:"/index.json",lunrLanguageCode:"zh",lunrSegmentitURL:"/lib/lunr/lunr.segmentit.js",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"lunr"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>

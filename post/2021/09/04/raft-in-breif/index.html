@@ -1,420 +1,97 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noodp" />
-        <title>Raft in breif - 瘋魔</title><meta name="Description" content="Peven&#39;s web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="Raft in breif" />
-<meta property="og:description" content="概览 算法实现概要&#34; 算法实现概要 安全性保证 Raft保证以下五条准则在算法运行期间始终成立(Invariance): Election Safety: 一个世代term内至多产" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://blog.peven.me/post/2021/09/04/raft-in-breif/" /><meta property="og:image" content="https://blog.peven.me/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2021-09-04T14:43:30+08:00" />
-<meta property="article:modified_time" content="2021-10-06T23:20:09+08:00" /><meta property="og:site_name" content="My cool site" />
-
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="https://blog.peven.me/logo.png"/>
-
-<meta name="twitter:title" content="Raft in breif"/>
-<meta name="twitter:description" content="概览 算法实现概要&#34; 算法实现概要 安全性保证 Raft保证以下五条准则在算法运行期间始终成立(Invariance): Election Safety: 一个世代term内至多产"/>
-<meta name="application-name" content="瘋魔">
-<meta name="apple-mobile-web-app-title" content="瘋魔"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://blog.peven.me/post/2021/09/04/raft-in-breif/" /><link rel="prev" href="https://blog.peven.me/post/2021/08/21/dgraph-memo/" /><link rel="next" href="https://blog.peven.me/post/2021/10/06/innodb-doublewrite/" /><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"></noscript><link rel="preload" href="https://unpkg.com/animate.css@4.1.1/animate.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link rel="stylesheet" href="https://unpkg.com/animate.css@4.1.1/animate.min.css"></noscript><script type="application/ld+json">
-    {
-        "@context": "http://schema.org",
-        "@type": "BlogPosting",
-        "headline": "Raft in breif",
-        "inLanguage": "zh-CN",
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https:\/\/blog.peven.me\/post\/2021\/09\/04\/raft-in-breif\/"
-        },"image": ["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre": "posts","keywords": "raft, Distributed System","wordcount":  3412 ,
-        "url": "https:\/\/blog.peven.me\/post\/2021\/09\/04\/raft-in-breif\/","datePublished": "2021-09-04T14:43:30+08:00","dateModified": "2021-10-06T23:20:09+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
-            "@type": "Organization",
-            "name": "Peven","logo": "https:\/\/blog.peven.me\/images\/avatar.jpg"},"author": {
-                "@type": "Person",
-                "name": "Peven"
-            },"description": ""
-    }
-    </script></head>
-    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
-
-        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
-    <div class="header-wrapper">
-        <div class="header-title">
-            <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-        </div>
-        <div class="menu">
-            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/post/2021/09/04/raft-in-breif/" selected>简体中文</option></select>
-                    </a><span class="menu-item search" id="search-desktop">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-desktop">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-desktop">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</header><header class="mobile" id="header-mobile">
-    <div class="header-container">
-        <div class="header-wrapper">
-            <div class="header-title">
-                <a href="/" title="瘋魔"><img
-        class="lazyload logo"
-        src="/svg/loading.min.svg"
-        data-src="/title.png"
-        data-srcset="/title.png, /title.png 1.5x, /title.png 2x"
-        data-sizes="auto"
-        alt="/title.png"
-        title="/title.png" /></a>
-            </div>
-            <div class="menu-toggle" id="menu-toggle-mobile">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-        <div class="menu" id="menu-mobile"><div class="search-wrapper">
-                    <div class="search mobile" id="search-mobile">
-                        <input type="text" placeholder="找啥呢,给点提示让咱帮帮你..." id="search-input-mobile">
-                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
-                            <i class="fas fa-search fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
-                            <i class="fas fa-times-circle fa-fw" aria-hidden="true"></i>
-                        </a>
-                        <span class="search-button search-loading" id="search-loading-mobile">
-                            <i class="fas fa-spinner fa-fw fa-spin" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
-                        取消
-                    </a>
-                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/phoon" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a class="menu-item" href="/index.xml" title="RSS"><i class='fas fa-rss-square'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
-                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
-            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden="true"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/post/2021/09/04/raft-in-breif/" selected>简体中文</option></select>
-                </a></div>
-    </div>
-</header><div class="search-dropdown desktop">
-        <div id="search-dropdown-desktop"></div>
-    </div>
-    <div class="search-dropdown mobile">
-        <div id="search-dropdown-mobile"></div>
-    </div><main class="main">
-                <div class="container"><div class="toc" id="toc-auto">
-            <h2 class="toc-title">目录</h2>
-            <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Raft in breif</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="https://blog.peven.me" title="Author" target="_blank" rel="noopener noreffer author" class="author"><i class="fas fa-user-circle fa-fw" aria-hidden="true"></i>Peven</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/%E7%AE%97%E6%B3%95/"><i class="far fa-folder fa-fw" aria-hidden="true"></i>算法</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>&nbsp;<time datetime="2021-09-04">2021-09-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden="true"></i>&nbsp;约 3412 字&nbsp;
-                <i class="far fa-clock fa-fw" aria-hidden="true"></i>&nbsp;预计阅读 7 分钟&nbsp;</div>
-        </div><div class="details toc" id="toc-static"  data-kept="">
-                <div class="details-summary toc-title">
-                    <span>目录</span>
-                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
-                </div>
-                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
-  <ul>
-    <li><a href="#概览">概览</a></li>
-    <li><a href="#安全性保证">安全性保证</a></li>
-    <li><a href="#leader选举">Leader选举</a></li>
-    <li><a href="#日志复制">日志复制</a></li>
-    <li><a href="#成员配置变更">成员(配置)变更</a></li>
-    <li><a href="#日志压缩">日志压缩</a></li>
-    <li><a href="#see-also">See Also</a></li>
-  </ul>
-</nav></div>
-            </div><div class="content" id="content"><h2 id="概览">概览</h2>
-<figure><a class="lightgallery" href="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png" title="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png" data-thumbnail="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png" data-sub-html="<h2>算法实现概要</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png"
-            data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png, https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png 2x"
-            data-sizes="auto"
-            alt="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png" width="100%" />
-    </a><figcaption class="image-caption">算法实现概要</figcaption>
-    </figure>
-<h2 id="安全性保证">安全性保证</h2>
-<p>Raft保证以下五条准则在算法运行期间始终成立(Invariance):</p>
-<ul>
-<li><code>Election Safety</code>: 一个世代<code>term</code>内至多产生一个leader.</li>
-<li><code>Leader Append-Only</code>: leader在自己的日志中只会追加新Entry而不会去修改或删除某一项Entry.</li>
-<li><code>Log Matching</code>: 若俩日志中某Entry有着相同的index和term, 则该Entry之前的日志项都相同.</li>
-<li><code>Leader Completeness</code>: 若一个Entry在某世代term内已committed, 则此后任何term内该Entry都存在.</li>
-<li><code>State Machine Safety</code>: 若状态机应用了某Entry, 则该index处不应再应用其他Entry.</li>
-</ul>
-<h2 id="leader选举">Leader选举</h2>
-<figure><a class="lightgallery" href="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png" title="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png" data-thumbnail="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png" data-sub-html="<h2>节点角色状态转移</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png"
-            data-srcset="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png, https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png 1.5x, https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png 2x"
-            data-sizes="auto"
-            alt="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png" width="100%" />
-    </a><figcaption class="image-caption">节点角色状态转移</figcaption>
-    </figure>
-<p>选举<code>Leader</code>思想很简单: 某个节点开始竞选某个世代<code>term</code>的<code>leader</code>, 向其他节点发送<code>RequestVote RPC</code>, 如果他得到的支持票数满足<a href="https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29" target="_blank" rel="noopener noreffer">quorum</a>机制, 则成为该<code>term</code>内合法的<code>leader</code>. 这里面的关键问题是如何防止出现<code>split brain</code>问题(确保每个<code>term</code>内仅会出现一个<code>leader</code>).</p>
-<p>首先, 对于一个给定的<code>Term</code>, 服务器只会进行一次投票(且只会投给<code>Term</code>更高的), 且为了避免出现过多的竞选者, 各节点的触发选举超时时间应随机化. 此外, <code>RequestVoteRPC</code>里还应带上候选者的日志信息, 避免选出落后的<code>Leader</code>而导致日志覆盖(违背线性化).</p>
-<h2 id="日志复制">日志复制</h2>
-<p>要点:</p>
-<ol>
-<li>
-<p>大部分节点(<code>quorum</code>)已知晓的<code>Entry</code>的状态即为已<code>committed</code>, Leader会将其应用到状态机（持久化），返回客户端执行结果.</p>
-</li>
-<li>
-<p>Leader在下一次的<code>AppendEntries RPC</code>中带上<code>commitedIndex</code>，这样followers就知道自己相应的日志项也该应用到状态机了.</p>
-</li>
-<li>
-<p>Leader在<code>AppendEntries RPC</code>中带上新<code>Entry</code>之前的<code>Entry</code>信息，follower若检查到自己没有该<code>Entry</code>的话，就会知道自己之前的复制可能出了差错并拒绝掉该<code>Entry</code>. 只要follower的结果返回了成功, 我们就知道该follower与leader至少在新<code>Entry</code>之前是保持一致了的.</p>
-</li>
-<li>
-<p>Leader宕机带来的不一致问题(复制以Leader为准则): Leader通过<code>AppendEntries RPC</code>不断来回的试探到follower与之匹配的日志记录, 然后将其覆盖重写为与自己一致的项.</p>
-</li>
-<li>
-<p>新Leader产生后, 可以先复制一个<code>no-op Command</code>的<code>Entry</code>从而更快的获得各follower的复制进度. 对前任的遗留日志需通过提交自己任期的日志去进行间接提交. 原因如下:</p>
-</li>
-</ol>
-<figure><a class="lightgallery" href="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg" title="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg" data-thumbnail="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg" data-sub-html="<h2>提交前任遗留日志</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg"
-            data-srcset="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg, https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg 1.5x, https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg 2x"
-            data-sizes="auto"
-            alt="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg" width="100%" />
-    </a><figcaption class="image-caption">提交前任遗留日志</figcaption>
-    </figure>
-<ul>
-<li><code>a</code>: 此时$S_1$成为<code>term 2</code>的leader并产生了Entry, 只复制到了$S_2$后就crash了;</li>
-<li><code>b</code>: $S_5$成为<code>term 3</code>的leader并产生了Entry, 但还没复制就crash了;</li>
-<li><code>c</code>: $S_1$成为<code>term 4</code>的leader并产生了Entry, 他先复制前任的遗留Entry到了大多数节点, 但还没持久化提交就又crash了;</li>
-<li><code>d</code>: $S_5$成为新term的leader, 未产生Entry, 接着它复制前任遗留的Entry, 并导致了日志重写.</li>
-</ul>
-<p>可以看到, 由于策略是上来就提交前任的遗留Entry, 导致了日志被重写. 正确做法的结果应如<code>e</code>:<code> c</code>时刻$S_1$成为leader后, 等待到提交自己任期的Entry, 前任的遗留日志自然会被复制从而被间接提交. 且此后$S_5$由于落后的日志也不会再成功竞选.</p>
-<h2 id="成员配置变更">成员(配置)变更</h2>
-<p>变更配置时, 可不是简单的直接从旧的配置换到新的上去就行(换配置然后重启). 为保证系统可用性和安全性, 应使用<code>2-phase</code>:</p>
-<ol>
-<li>第一步: 禁止旧配置的系统继续接受新的请求</li>
-<li>第二步: 切换到新的配置文件上</li>
-</ol>
-<p>在新旧配置转换过渡期间会同时存在两种配置, 这期间系统可能会产生<code>split brain</code>. Raft采用的<code>2-phase</code>机制叫<code>joint consensus</code>: 其使得即使在过渡期间系统仍能正确的, 安全的运行: 如在$C_{old}$到$C_{new}$的过渡期: $C_{old, new}$ , 为防止<code>split brain</code>, 决议要同时通过两个配置的joint集合的quorum通过才行.</p>
-<p>思考如下的配置拓扑:</p>
-<figure><a class="lightgallery" href="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png" title="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png" data-thumbnail="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png" data-sub-html="<h2>3区域配置拓扑</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png"
-            data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png, https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png 2x"
-            data-sizes="auto"
-            alt="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png" width="100%" />
-    </a><figcaption class="image-caption">3区域配置拓扑</figcaption>
-    </figure>
-<p>如上图, 3个region(X, Y, Z)中配置$C_1$($X_2$,  $Y_1$,  $Z_1$) 组成的raft集群($Y_1$是leader)现在想要切换到配置$C_2$(新增$X_1$, 移除$X_2$). 先看看直接切换:</p>
-<figure><a class="lightgallery" href="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif" title="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif" data-thumbnail="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif" data-sub-html="<h2>直接配置切换</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif"
-            data-srcset="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif, https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif 1.5x, https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif 2x"
-            data-sizes="auto"
-            alt="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif" width="100%" />
-    </a><figcaption class="image-caption">直接配置切换</figcaption>
-    </figure>
-<p>可以看到, $Y_1$收到confchange后并切换到$C_2$, 与$X_1$组成了$C_2$的quorum, 与此同时, $X_2$与$Z_2$也组成了$C_1$的quorum, 这就导致了<code>split brain</code>. 而其中的原因是我们太过贪心, 将$X_1$的加入和$X_2$的移除同时进行了.</p>
-<p>所以接下来我们先增加$X_1$, 再移除$X_2$(1 by 1, 让大部分节点知晓到第一次变更后再处理下一条). 则先$C_2$ = ($X_1$, $X_2$, $Y_1$, $Z_2$), 其quorum为3, 此时先变更的$X_1$与$Y_1$一起并无法做出决议. 但这样就真的完美解决了我们的问题吗?</p>
-<p>若这时region X整个不可达时, 整个集群就得等待其重新上线才能恢复服务. 这时就引出了<code>joint consensus</code>:</p>
-<p>针对上例, 我们在进行配置变更时, 引入过渡期配置$C_{1,2}$ = $C_1$ &amp;&amp; $C_2$ = ($X_2$, $Y_1$, $Z_2$) &amp;&amp; ($X_1$, $Y_1$, $Z_2$) , 过渡期间任何决议都得同时通过两个配置中的quorum通过才行:</p>
-<figure><a class="lightgallery" href="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png" title="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png" data-thumbnail="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png" data-sub-html="<h2>Joint consensus</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png"
-            data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png, https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png 2x"
-            data-sizes="auto"
-            alt="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png" width="100%" />
-    </a><figcaption class="image-caption">Joint consensus</figcaption>
-    </figure>
-<p>这样, 即使X region整个失联, 集群仍是能够正常的运行.</p>
-<p>使用<code>joint consensus</code>进行成员配置变更的大致流程如下:</p>
-<figure><a class="lightgallery" href="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png" title="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png" data-thumbnail="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png" data-sub-html="<h2>配置变更流程</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png"
-            data-srcset="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png, https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png 1.5x, https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png 2x"
-            data-sizes="auto"
-            alt="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png" width="100%" />
-    </a><figcaption class="image-caption">配置变更流程</figcaption>
-    </figure>
-<p>其中, 需要注意的问题是如果leader发生crash了会怎样? 由于有<code>Leader completeness</code>的保证, 在$C_{1,2}$ committed后, crash后新的leader的配置也一定会是$C_{1,2}$. 还有一种情况: $C_2$ committed后, leader可能并不在此配置中, 此时leader自己降级为follower, 进行$C_2$配置内的选举.</p>
-<p>此外, Raft还针对新增的成员引入了一个新的角色: learner(可以看看这篇文章: <a href="https://etcd.io/docs/v3.5/learning/design-learner/" target="_blank" rel="noopener noreffer">etcd learner design</a>). 在节点加入集群初期, 由于日志复制状态通常会远远落后于leader, learner在日志追赶未完成前不会参与决议投票. 而对于已移除(不在新配置中)但未下线的节点, 其在心跳超时后会发起<code>RequestVote RPC</code>反复干扰现有配置的集群, 避免的方式为只要节点认为现有leader还在(最小选举超时机制),就不理会新的<code>RequestVote RPC</code>.</p>
-<h2 id="日志压缩">日志压缩</h2>
-<p>我们不能允许日志记录无休止的增长, 必须对其进行压缩以使获得更小的空间占用和更高效的日志复制:</p>
-<p>通过<code>check point</code>处的快照(Snapshot)记录保留committed entries的最新状态, 旧的日志条目就可以删除掉.</p>
-<figure><a class="lightgallery" href="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png" title="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png" data-thumbnail="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png" data-sub-html="<h2>Snapshot</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png"
-            data-srcset="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png, https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png 1.5x, https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png 2x"
-            data-sizes="auto"
-            alt="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png" width="100%" />
-    </a><figcaption class="image-caption">Snapshot</figcaption>
-    </figure>
-<p>参考Etcd raft库的设计: 该库将raftLog分为<code>storage(stable)</code>和<code>unstable</code>.</p>
-<p><code>Snapshot</code>定义:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-protobuf" data-lang="protobuf"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">message</span> <span class="nc">SnapshotMetadata</span> <span class="p">{</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="err"></span>	<span class="k">optional</span> <span class="n">ConfState</span> <span class="n">conf_state</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">[(</span><span class="n">gogoproto.nullable</span><span class="p">)</span> <span class="o">=</span> <span class="kc">false</span><span class="p">];</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="err"></span>	<span class="k">optional</span> <span class="kt">uint64</span>    <span class="n">index</span>      <span class="o">=</span> <span class="mi">2</span> <span class="p">[(</span><span class="n">gogoproto.nullable</span><span class="p">)</span> <span class="o">=</span> <span class="kc">false</span><span class="p">];</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="err"></span>	<span class="k">optional</span> <span class="kt">uint64</span>    <span class="n">term</span>       <span class="o">=</span> <span class="mi">3</span> <span class="p">[(</span><span class="n">gogoproto.nullable</span><span class="p">)</span> <span class="o">=</span> <span class="kc">false</span><span class="p">];</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="err"></span><span class="p">}</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="err">
-</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="err"></span><span class="kd">message</span> <span class="nc">Snapshot</span> <span class="p">{</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="err"></span>	<span class="k">optional</span> <span class="kt">bytes</span>            <span class="n">data</span>     <span class="o">=</span> <span class="mi">1</span><span class="p">;</span><span class="err">
-</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="err"></span>	<span class="k">optional</span> <span class="n">SnapshotMetadata</span> <span class="n">metadata</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">[(</span><span class="n">gogoproto.nullable</span><span class="p">)</span> <span class="o">=</span> <span class="kc">false</span><span class="p">];</span><span class="err">
-</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="err"></span><span class="p">}</span><span class="err">
-</span></span></span></code></pre></div><p><code>storage.go</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">type</span> <span class="nx">Storage</span> <span class="kd">interface</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	<span class="c1">// TODO(tbg): split this into two interfaces, LogStorage and StateStorage.
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="c1"></span>	<span class="c1">// InitialState returns the saved HardState and ConfState information.
-</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="c1"></span>	<span class="nf">InitialState</span><span class="p">()</span> <span class="p">(</span><span class="nx">pb</span><span class="p">.</span><span class="nx">HardState</span><span class="p">,</span> <span class="nx">pb</span><span class="p">.</span><span class="nx">ConfState</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln"> 5</span><span class="cl">	<span class="c1">// Entries returns a slice of log entries in the range [lo,hi).
-</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="c1"></span>	<span class="c1">// MaxSize limits the total size of the log entries returned, but
-</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="c1"></span>	<span class="c1">// Entries returns at least one entry if any.
-</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="c1"></span>	<span class="nf">Entries</span><span class="p">(</span><span class="nx">lo</span><span class="p">,</span> <span class="nx">hi</span><span class="p">,</span> <span class="nx">maxSize</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">([]</span><span class="nx">pb</span><span class="p">.</span><span class="nx">Entry</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln"> 9</span><span class="cl">	<span class="c1">// Term returns the term of entry i, which must be in the range
-</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="c1"></span>	<span class="c1">// [FirstIndex()-1, LastIndex()]. The term of the entry before
-</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="c1"></span>	<span class="c1">// FirstIndex is retained for matching purposes even though the
-</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="c1"></span>	<span class="c1">// rest of that entry may not be available.
-</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="c1"></span>	<span class="nf">Term</span><span class="p">(</span><span class="nx">i</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">(</span><span class="kt">uint64</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">14</span><span class="cl">	<span class="c1">// LastIndex returns the index of the last entry in the log.
-</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="c1"></span>	<span class="nf">LastIndex</span><span class="p">()</span> <span class="p">(</span><span class="kt">uint64</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">16</span><span class="cl">	<span class="c1">// FirstIndex returns the index of the first log entry that is
-</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="c1"></span>	<span class="c1">// possibly available via Entries (older entries have been incorporated
-</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="c1"></span>	<span class="c1">// into the latest Snapshot; if storage only contains the dummy entry the
-</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="c1"></span>	<span class="c1">// first log entry is not available).
-</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="c1"></span>	<span class="nf">FirstIndex</span><span class="p">()</span> <span class="p">(</span><span class="kt">uint64</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">21</span><span class="cl">	<span class="c1">// Snapshot returns the most recent snapshot.
-</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="c1"></span>	<span class="c1">// If snapshot is temporarily unavailable, it should return ErrSnapshotTemporarilyUnavailable,
-</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="c1"></span>	<span class="c1">// so raft state machine could know that Storage needs some time to prepare
-</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="c1"></span>	<span class="c1">// snapshot and call Snapshot later.
-</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="c1"></span>	<span class="nf">Snapshot</span><span class="p">()</span> <span class="p">(</span><span class="nx">pb</span><span class="p">.</span><span class="nx">Snapshot</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="ln">27</span><span class="cl">
-</span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="c1">// MemoryStorage implements the Storage interface backed by an
-</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="c1">// in-memory array.
-</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">MemoryStorage</span> <span class="kd">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">31</span><span class="cl">	<span class="c1">// Protects access to all fields. Most methods of MemoryStorage are
-</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="c1"></span>	<span class="c1">// run on the raft goroutine, but Append() is run on an application
-</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="c1"></span>	<span class="c1">// goroutine.
-</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="c1"></span>	<span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
-</span></span><span class="line"><span class="ln">35</span><span class="cl">	<span class="nx">hardState</span> <span class="nx">pb</span><span class="p">.</span><span class="nx">HardState</span>
-</span></span><span class="line"><span class="ln">36</span><span class="cl">	<span class="nx">snapshot</span>  <span class="nx">pb</span><span class="p">.</span><span class="nx">Snapshot</span>
-</span></span><span class="line"><span class="ln">37</span><span class="cl">	<span class="c1">// ents[i] has raft log position i+snapshot.Metadata.Index
-</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="c1"></span>	<span class="nx">ents</span> <span class="p">[]</span><span class="nx">pb</span><span class="p">.</span><span class="nx">Entry</span>
-</span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p><code>log.go</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">type</span> <span class="nx">raftLog</span> <span class="kd">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	<span class="c1">// storage contains all stable entries since the last snapshot.
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="c1"></span>	<span class="nx">storage</span> <span class="nx">Storage</span>
-</span></span><span class="line"><span class="ln"> 4</span><span class="cl">	<span class="c1">// unstable contains all unstable entries and snapshot.
-</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="c1"></span>	<span class="c1">// they will be saved into storage.
-</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="c1"></span>	<span class="nx">unstable</span> <span class="nx">unstable</span>
-</span></span><span class="line"><span class="ln"> 7</span><span class="cl">	<span class="c1">// committed is the highest log position that is known to be in
-</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="c1"></span>	<span class="c1">// stable storage on a quorum of nodes.
-</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="c1"></span>	<span class="nx">committed</span> <span class="kt">uint64</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="c1">// applied is the highest log position that the application has
-</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="c1"></span>	<span class="c1">// been instructed to apply to its state machine.
-</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="c1"></span>	<span class="c1">// Invariant: applied &lt;= committed
-</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="c1"></span>	<span class="nx">applied</span> <span class="kt">uint64</span>
-</span></span><span class="line"><span class="ln">14</span><span class="cl">	<span class="nx">logger</span> <span class="nx">Logger</span>
-</span></span><span class="line"><span class="ln">15</span><span class="cl">	<span class="c1">// maxNextEntsSize is the maximum number aggregate byte size of the messages
-</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="c1"></span>	<span class="c1">// returned from calls to nextEnts.
-</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="c1"></span>	<span class="nx">maxNextEntsSize</span> <span class="kt">uint64</span>
-</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p><code>log_unstable.go</code>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// unstable.entries[i] has raft log position i+unstable.offset.
-</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="c1">// Note that unstable.offset may be less than the highest log
-</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="c1">// position in storage; this means that the next write to storage
-</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="c1">// might need to truncate the log before persisting unstable.entries.
-</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">unstable</span> <span class="kd">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln"> 6</span><span class="cl">	<span class="c1">// the incoming unstable snapshot, if any.
-</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="c1"></span>	<span class="nx">snapshot</span> <span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">Snapshot</span>
-</span></span><span class="line"><span class="ln"> 8</span><span class="cl">	<span class="c1">// all entries that have not yet been written to storage.
-</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="c1"></span>	<span class="nx">entries</span> <span class="p">[]</span><span class="nx">pb</span><span class="p">.</span><span class="nx">Entry</span>
-</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="nx">offset</span>  <span class="kt">uint64</span>
-</span></span><span class="line"><span class="ln">11</span><span class="cl">	<span class="nx">logger</span> <span class="nx">Logger</span>
-</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>用一张图来直观的展示:</p>
-<figure><a class="lightgallery" href="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png" title="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png" data-thumbnail="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png" data-sub-html="<h2>Etcd raft日志结构</h2>">
-        <img
-            class="lazyload"
-            src="/svg/loading.min.svg"
-            data-src="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png"
-            data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png, https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png 2x"
-            data-sizes="auto"
-            alt="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png" width="100%" />
-    </a><figcaption class="image-caption">Etcd raft日志结构</figcaption>
-    </figure>
-<h2 id="see-also">See Also</h2>
-<p>Raft Paper: <a href="https://raft.github.io/raft.pdf" target="_blank" rel="noopener noreffer">https://raft.github.io/raft.pdf</a></p>
-<p>Etcd Raft lib: <a href="https://github.com/etcd-io/etcd/tree/main/raft" target="_blank" rel="noopener noreffer">https://github.com/etcd-io/etcd/tree/main/raft</a></p>
-<p>Availability and Region Failure: Joint Consensus in CockroachDB: <a href="https://www.cockroachlabs.com/blog/joint-consensus-raft/" target="_blank" rel="noopener noreffer">https://www.cockroachlabs.com/blog/joint-consensus-raft</a></p>
-</div><div class="post-footer" id="post-footer">
-    <div class="post-info">
-        <div class="post-info-line">
-            <div class="post-info-mod">
-                <span>更新于 2021-10-06&nbsp;<a class="git-hash" href="https://github.com/phoon/phoon.github.io/commit/29e8a2e07768933328bd70df8480b1078a3d0e84" target="_blank" title="commit by Peven(iampeven@gmail.com) 29e8a2e07768933328bd70df8480b1078a3d0e84: new post: Doublewrite in InnoDB">
-                                    <i class="fas fa-hashtag fa-fw" aria-hidden="true"></i>29e8a2e</a></span>
-            </div></div>
-        <div class="post-info-line">
-            <div class="post-info-md"></div>
-            <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://blog.peven.me/post/2021/09/04/raft-in-breif/" data-title="Raft in breif" data-hashtags="raft,Distributed System"><i class="fab fa-twitter fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://blog.peven.me/post/2021/09/04/raft-in-breif/" data-hashtag="raft"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://blog.peven.me/post/2021/09/04/raft-in-breif/" data-title="Raft in breif"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://blog.peven.me/post/2021/09/04/raft-in-breif/" data-title="Raft in breif"><i data-svg-src="https://unpkg.com/simple-icons@7.0.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://blog.peven.me/post/2021/09/04/raft-in-breif/" data-title="Raft in breif"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="post-info-more">
-        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/raft/">raft</a>,&nbsp;<a href="/tags/distributed-system/">Distributed System</a></section>
-        <section>
-            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
-        </section>
-    </div>
-
-    <div class="post-nav"><a href="/post/2021/08/21/dgraph-memo/" class="prev" rel="prev" title="Dgraph备忘录"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>Dgraph备忘录</a>
-            <a href="/post/2021/10/06/innodb-doublewrite/" class="next" rel="next" title="InnoDB Doublewrite机制">InnoDB Doublewrite机制<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
-</div>
-</article></div>
-            </main><footer class="footer">
-        <div class="footer-container"><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.99.1">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden="true"></i> LoveIt</a>
-                </div><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2018 - 2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="https://blog.peven.me" target="_blank">Peven</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
-        </div>
-    </footer></div>
-
-        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
-                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
-            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
-                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
-            </a>
-        </div><link rel="stylesheet" href="https://unpkg.com/lightgallery@2.4.0/css/lightgallery-bundle.min.css"><link rel="stylesheet" href="https://unpkg.com/katex@0.15.6/dist/katex.min.css"><link rel="stylesheet" href="https://unpkg.com/katex@0.15.6/dist/contrib/copy-tex.min.css"><script type="text/javascript" src="https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://unpkg.com/lunr@2.3.9/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://unpkg.com/lightgallery@2.4.0/lightgallery.min.js"></script><script type="text/javascript" src="https://unpkg.com/lightgallery@2.4.0/plugins/thumbnail/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://unpkg.com/lightgallery@2.4.0/plugins/zoom/lg-zoom.min.js"></script><script type="text/javascript" src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://unpkg.com/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://unpkg.com/katex@0.15.6/dist/katex.min.js"></script><script type="text/javascript" src="https://unpkg.com/katex@0.15.6/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://unpkg.com/katex@0.15.6/dist/contrib/copy-tex.min.js"></script><script type="text/javascript" src="https://unpkg.com/katex@0.15.6/dist/contrib/mhchem.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":40},"comment":{},"lightgallery":true,"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
-</html>
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content="noodp"><title>Raft in breif - 瘋魔</title><meta name=Description content="Peven's web site. Find my information, my blog on technologies and personal hobbies here."><meta property="og:title" content="Raft in breif"><meta property="og:description" content="概览 算法实现概要 安全性保证 Raft保证以下五条准则在算法运行期间始终成立(Invariance): Election Safety: 一个世代term内至多产生一个lead"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.peven.me/post/2021/09/04/raft-in-breif/"><meta property="og:image" content="https://blog.peven.me/logo.png"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-09-04T14:43:30+08:00"><meta property="article:modified_time" content="2022-07-08T23:12:51+08:00"><meta property="og:site_name" content="My cool site"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://blog.peven.me/logo.png"><meta name=twitter:title content="Raft in breif"><meta name=twitter:description content="概览 算法实现概要 安全性保证 Raft保证以下五条准则在算法运行期间始终成立(Invariance): Election Safety: 一个世代term内至多产生一个lead"><meta name=application-name content="瘋魔"><meta name=apple-mobile-web-app-title content="瘋魔"><meta name=theme-color content="#ffffff"><meta name=msapplication-TileColor content="#da532c"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://blog.peven.me/post/2021/09/04/raft-in-breif/><link rel=prev href=https://blog.peven.me/post/2021/08/21/dgraph-memo/><link rel=next href=https://blog.peven.me/post/2021/10/06/innodb-doublewrite/><link rel=stylesheet href=/css/style.min.css><link rel=preload href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/@fortawesome/fontawesome-free@6.1.1/css/all.min.css></noscript><link rel=preload href=https://unpkg.com/animate.css@4.1.1/animate.min.css as=style onload='this.onload=null,this.rel="stylesheet"'><noscript><link rel=stylesheet href=https://unpkg.com/animate.css@4.1.1/animate.min.css></noscript><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Raft in breif","inLanguage":"zh-CN","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/blog.peven.me\/post\/2021\/09\/04\/raft-in-breif\/"},"image":["https:\/\/blog.peven.me\/images\/screenshot.png"],"genre":"posts","keywords":"raft, Distributed System","wordcount":3383,"url":"https:\/\/blog.peven.me\/post\/2021\/09\/04\/raft-in-breif\/","datePublished":"2021-09-04T14:43:30+08:00","dateModified":"2022-07-08T23:12:51+08:00","license":"This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher":{"@type":"Organization","name":"Peven","logo":"https:\/\/blog.peven.me\/images\/avatar.jpg"},"author":{"@type":"Person","name":"Peven"},"description":""}</script></head><body data-header-desktop=fixed data-header-mobile=auto><script type=text/javascript>(window.localStorage&&localStorage.getItem("theme")?localStorage.getItem("theme")==="dark":"auto"==="auto"?window.matchMedia("(prefers-color-scheme: dark)").matches:"auto"==="dark")&&document.body.setAttribute("theme","dark")</script><div id=mask></div><div class=wrapper><header class=desktop id=header-desktop><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu><div class=menu-inner><a class=menu-item href=/posts/>所有文章 </a><a class=menu-item href=/tags/>标签 </a><a class=menu-item href=/categories/>分类 </a><a class=menu-item href=/friends/>友链 </a><a class=menu-item href=/about/>关于 </a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i> </a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i> </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item language" title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select id=language-select-desktop onchange="location=this.value"><option value=/post/2021/09/04/raft-in-breif/ selected>简体中文</option></select>
+</a><span class="menu-item search" id=search-desktop><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-desktop>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-desktop title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-desktop title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-desktop><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span>
+</span><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题><i class="fas fa-adjust fa-fw" aria-hidden=true></i></a></div></div></div></header><header class=mobile id=header-mobile><div class=header-container><div class=header-wrapper><div class=header-title><a href=/ title=瘋魔><img class="lazyload logo" src=/svg/loading.min.svg data-src=/title.png data-srcset="/title.png, /title.png 1.5x, /title.png 2x" data-sizes=auto alt=/title.png title=/title.png></a></div><div class=menu-toggle id=menu-toggle-mobile><span></span><span></span><span></span></div></div><div class=menu id=menu-mobile><div class=search-wrapper><div class="search mobile" id=search-mobile><input type=text placeholder=找啥呢,给点提示让咱帮帮你... id=search-input-mobile>
+<a href=javascript:void(0); class="search-button search-toggle" id=search-toggle-mobile title=搜索><i class="fas fa-search fa-fw" aria-hidden=true></i></a>
+<a href=javascript:void(0); class="search-button search-clear" id=search-clear-mobile title=清空><i class="fas fa-times-circle fa-fw" aria-hidden=true></i></a>
+<span class="search-button search-loading" id=search-loading-mobile><i class="fas fa-spinner fa-fw fa-spin" aria-hidden=true></i></span></div><a href=javascript:void(0); class=search-cancel id=search-cancel-mobile>取消</a></div><a class=menu-item href=/posts/ title>所有文章</a><a class=menu-item href=/tags/ title>标签</a><a class=menu-item href=/categories/ title>分类</a><a class=menu-item href=/friends/ title>友链</a><a class=menu-item href=/about/ title>关于</a><a class=menu-item href=https://github.com/phoon title=GitHub rel="noopener noreffer" target=_blank><i class='fab fa-github fa-fw'></i></a><a class=menu-item href=/index.xml title=RSS><i class='fas fa-rss-square'></i></a><a href=javascript:void(0); class="menu-item theme-switch" title=切换主题>
+<i class="fas fa-adjust fa-fw" aria-hidden=true></i>
+</a><a href=javascript:void(0); class=menu-item title=选择语言>简体中文<i class="fas fa-chevron-right fa-fw" aria-hidden=true></i>
+<select class=language-select onchange="location=this.value"><option value=/post/2021/09/04/raft-in-breif/ selected>简体中文</option></select></a></div></div></header><div class="search-dropdown desktop"><div id=search-dropdown-desktop></div></div><div class="search-dropdown mobile"><div id=search-dropdown-mobile></div></div><main class=main><div class=container><div class=toc id=toc-auto><h2 class=toc-title>目录</h2><div class=toc-content id=toc-content-auto></div></div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Raft in breif</h1><div class=post-meta><div class=post-meta-line><span class=post-author><a href=https://blog.peven.me title=Author target=_blank rel="noopener noreffer author" class=author><i class="fas fa-user-circle fa-fw" aria-hidden=true></i>Peven</a></span>&nbsp;<span class=post-category>收录于 <a href=/categories/%E7%AE%97%E6%B3%95/><i class="far fa-folder fa-fw" aria-hidden=true></i>算法</a></span></div><div class=post-meta-line><i class="far fa-calendar-alt fa-fw" aria-hidden=true></i>&nbsp;<time datetime=2021-09-04>2021-09-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw" aria-hidden=true></i>&nbsp;约 3383 字&nbsp;
+<i class="far fa-clock fa-fw" aria-hidden=true></i>&nbsp;预计阅读 7 分钟&nbsp;</div></div><div class="details toc" id=toc-static data-kept><div class="details-summary toc-title"><span>目录</span>
+<span><i class="details-icon fas fa-angle-right" aria-hidden=true></i></span></div><div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents><ul><li><a href=#概览>概览</a></li><li><a href=#安全性保证>安全性保证</a></li><li><a href=#leader选举>Leader选举</a></li><li><a href=#日志复制>日志复制</a></li><li><a href=#成员配置变更>成员(配置)变更</a></li><li><a href=#日志压缩>日志压缩</a></li><li><a href=#see-also>See Also</a></li></ul></nav></div></div><div class=content id=content><h2 id=概览>概览</h2><figure><a class=lightgallery href=https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png title=https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png data-thumbnail=https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png data-sub-html="<h2>算法实现概要</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png, https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png 2x" data-sizes=auto alt=https://img13.360buyimg.com/ddimg/jfs/t1/156556/6/21896/461723/61323085E123fac2c/b209f3cc162ba3de.png width=100%></a><figcaption class=image-caption>算法实现概要</figcaption></figure><h2 id=安全性保证>安全性保证</h2><p>Raft保证以下五条准则在算法运行期间始终成立(Invariance):</p><ul><li><code>Election Safety</code>: 一个世代<code>term</code>内至多产生一个leader.</li><li><code>Leader Append-Only</code>: leader在自己的日志中只会追加新Entry而不会去修改或删除某一项Entry.</li><li><code>Log Matching</code>: 若俩日志中某Entry有着相同的index和term, 则该Entry之前的日志项都相同.</li><li><code>Leader Completeness</code>: 若一个Entry在某世代term内已committed, 则此后任何term内该Entry都存在.</li><li><code>State Machine Safety</code>: 若状态机应用了某Entry, 则该index处不应再应用其他Entry.</li></ul><h2 id=leader选举>Leader选举</h2><figure><a class=lightgallery href=https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png title=https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png data-thumbnail=https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png data-sub-html="<h2>节点角色状态转移</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png data-srcset="https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png, https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png 1.5x, https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png 2x" data-sizes=auto alt=https://img10.360buyimg.com/ddimg/jfs/t1/44230/18/16643/87041/6132f98dEe6502809/d5cbf26072e83dbe.png width=100%></a><figcaption class=image-caption>节点角色状态转移</figcaption></figure><p>选举<code>Leader</code>思想很简单: 某个节点开始竞选某个世代<code>term</code>的<code>leader</code>, 向其他节点发送<code>RequestVote RPC</code>, 如果他得到的支持票数满足<a href=https://en.wikipedia.org/wiki/Quorum_%28distributed_computing%29 target=_blank rel="noopener noreffer">quorum</a>机制, 则成为该<code>term</code>内合法的<code>leader</code>. 这里面的关键问题是如何防止出现<code>split brain</code>问题(确保每个<code>term</code>内仅会出现一个<code>leader</code>).</p><p>首先, 对于一个给定的<code>Term</code>, 服务器只会进行一次投票(且只会投给<code>Term</code>更高的), 且为了避免出现过多的竞选者, 各节点的触发选举超时时间应随机化. 此外, <code>RequestVoteRPC</code>里还应带上候选者的日志信息, 避免选出落后的<code>Leader</code>而导致日志覆盖(违背线性化).</p><h2 id=日志复制>日志复制</h2><p>要点:</p><ol><li><p>大部分节点(<code>quorum</code>)已知晓的<code>Entry</code>的状态即为已<code>committed</code>, Leader会将其应用到状态机（持久化），返回客户端执行结果.</p></li><li><p>Leader在下一次的<code>AppendEntries RPC</code>中带上<code>commitedIndex</code>，这样followers就知道自己相应的日志项也该应用到状态机了.</p></li><li><p>Leader在<code>AppendEntries RPC</code>中带上新<code>Entry</code>之前的<code>Entry</code>信息，follower若检查到自己没有该<code>Entry</code>的话，就会知道自己之前的复制可能出了差错并拒绝掉该<code>Entry</code>. 只要follower的结果返回了成功, 我们就知道该follower与leader至少在新<code>Entry</code>之前是保持一致了的.</p></li><li><p>Leader宕机带来的不一致问题(复制以Leader为准则): Leader通过<code>AppendEntries RPC</code>不断来回的试探到follower与之匹配的日志记录, 然后将其覆盖重写为与自己一致的项.</p></li><li><p>新Leader产生后, 可以先复制一个<code>no-op Command</code>的<code>Entry</code>从而更快的获得各follower的复制进度. 对前任的遗留日志需通过提交自己任期的日志去进行间接提交. 原因如下:</p></li></ol><figure><a class=lightgallery href=https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg title=https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg data-thumbnail=https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg data-sub-html="<h2>提交前任遗留日志</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg data-srcset="https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg, https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg 1.5x, https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg 2x" data-sizes=auto alt=https://img14.360buyimg.com/ddimg/jfs/t1/62224/21/16485/388062/61388b2cEb7a2d9cd/660a2b352057874b.jpg width=100%></a><figcaption class=image-caption>提交前任遗留日志</figcaption></figure><ul><li><code>a</code>: 此时$S_1$成为<code>term 2</code>的leader并产生了Entry, 只复制到了$S_2$后就crash了;</li><li><code>b</code>: $S_5$成为<code>term 3</code>的leader并产生了Entry, 但还没复制就crash了;</li><li><code>c</code>: $S_1$成为<code>term 4</code>的leader并产生了Entry, 他先复制前任的遗留Entry到了大多数节点, 但还没持久化提交就又crash了;</li><li><code>d</code>: $S_5$成为新term的leader, 未产生Entry, 接着它复制前任遗留的Entry, 并导致了日志重写.</li></ul><p>可以看到, 由于策略是上来就提交前任的遗留Entry, 导致了日志被重写. 正确做法的结果应如<code>e</code>:<code> c</code>时刻$S_1$成为leader后, 等待到提交自己任期的Entry, 前任的遗留日志自然会被复制从而被间接提交. 且此后$S_5$由于落后的日志也不会再成功竞选.</p><h2 id=成员配置变更>成员(配置)变更</h2><p>变更配置时, 可不是简单的直接从旧的配置换到新的上去就行(换配置然后重启). 为保证系统可用性和安全性, 应使用<code>2-phase</code>:</p><ol><li>第一步: 禁止旧配置的系统继续接受新的请求</li><li>第二步: 切换到新的配置文件上</li></ol><p>在新旧配置转换过渡期间会同时存在两种配置, 这期间系统可能会产生<code>split brain</code>. Raft采用的<code>2-phase</code>机制叫<code>joint consensus</code>: 其使得即使在过渡期间系统仍能正确的, 安全的运行: 如在$C_{old}$到$C_{new}$的过渡期: $C_{old, new}$ , 为防止<code>split brain</code>, 决议要同时通过两个配置的joint集合的quorum通过才行.</p><p>思考如下的配置拓扑:</p><figure><a class=lightgallery href=https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png title=https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png data-thumbnail=https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png data-sub-html="<h2>3区域配置拓扑</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png, https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png 2x" data-sizes=auto alt=https://img13.360buyimg.com/ddimg/jfs/t1/198113/20/6506/14514/6132338aE54742997/4057840d076c07ef.png width=100%></a><figcaption class=image-caption>3区域配置拓扑</figcaption></figure><p>如上图, 3个region(X, Y, Z)中配置$C_1$($X_2$, $Y_1$, $Z_1$) 组成的raft集群($Y_1$是leader)现在想要切换到配置$C_2$(新增$X_1$, 移除$X_2$). 先看看直接切换:</p><figure><a class=lightgallery href=https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif title=https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif data-thumbnail=https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif data-sub-html="<h2>直接配置切换</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif data-srcset="https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif, https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif 1.5x, https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif 2x" data-sizes=auto alt=https://img12.360buyimg.com/ddimg/jfs/t1/194427/29/21560/157836/61322987Ec0ee8b82/5780f7b71bf82e64.gif width=100%></a><figcaption class=image-caption>直接配置切换</figcaption></figure><p>可以看到, $Y_1$收到confchange后并切换到$C_2$, 与$X_1$组成了$C_2$的quorum, 与此同时, $X_2$与$Z_2$也组成了$C_1$的quorum, 这就导致了<code>split brain</code>. 而其中的原因是我们太过贪心, 将$X_1$的加入和$X_2$的移除同时进行了.</p><p>所以接下来我们先增加$X_1$, 再移除$X_2$(1 by 1, 让大部分节点知晓到第一次变更后再处理下一条). 则先$C_2$ = ($X_1$, $X_2$, $Y_1$, $Z_2$), 其quorum为3, 此时先变更的$X_1$与$Y_1$一起并无法做出决议. 但这样就真的完美解决了我们的问题吗?</p><p>若这时region X整个不可达时, 整个集群就得等待其重新上线才能恢复服务. 这时就引出了<code>joint consensus</code>:</p><p>针对上例, 我们在进行配置变更时, 引入过渡期配置$C_{1,2}$ = $C_1$ && $C_2$ = ($X_2$, $Y_1$, $Z_2$) && ($X_1$, $Y_1$, $Z_2$) , 过渡期间任何决议都得同时通过两个配置中的quorum通过才行:</p><figure><a class=lightgallery href=https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png title=https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png data-thumbnail=https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png data-sub-html="<h2>Joint consensus</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png, https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png 2x" data-sizes=auto alt=https://img13.360buyimg.com/ddimg/jfs/t1/198734/35/6469/21828/61323eb6Ea8789b67/a17116a5928e124d.png width=100%></a><figcaption class=image-caption>Joint consensus</figcaption></figure><p>这样, 即使X region整个失联, 集群仍是能够正常的运行.</p><p>使用<code>joint consensus</code>进行成员配置变更的大致流程如下:</p><figure><a class=lightgallery href=https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png title=https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png data-thumbnail=https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png data-sub-html="<h2>配置变更流程</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png data-srcset="https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png, https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png 1.5x, https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png 2x" data-sizes=auto alt=https://img11.360buyimg.com/ddimg/jfs/t1/47295/15/16793/18627/6132e9aaE34afee39/1d095425383d34f5.png width=100%></a><figcaption class=image-caption>配置变更流程</figcaption></figure><p>其中, 需要注意的问题是如果leader发生crash了会怎样? 由于有<code>Leader completeness</code>的保证, 在$C_{1,2}$ committed后, crash后新的leader的配置也一定会是$C_{1,2}$. 还有一种情况: $C_2$ committed后, leader可能并不在此配置中, 此时leader自己降级为follower, 进行$C_2$配置内的选举.</p><p>此外, Raft还针对新增的成员引入了一个新的角色: learner(可以看看这篇文章: <a href=https://etcd.io/docs/v3.5/learning/design-learner/ target=_blank rel="noopener noreffer">etcd learner design</a>). 在节点加入集群初期, 由于日志复制状态通常会远远落后于leader, learner在日志追赶未完成前不会参与决议投票. 而对于已移除(不在新配置中)但未下线的节点, 其在心跳超时后会发起<code>RequestVote RPC</code>反复干扰现有配置的集群, 避免的方式为只要节点认为现有leader还在(最小选举超时机制),就不理会新的<code>RequestVote RPC</code>.</p><h2 id=日志压缩>日志压缩</h2><p>我们不能允许日志记录无休止的增长, 必须对其进行压缩以使获得更小的空间占用和更高效的日志复制:</p><p>通过<code>check point</code>处的快照(Snapshot)记录保留committed entries的最新状态, 旧的日志条目就可以删除掉.</p><figure><a class=lightgallery href=https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png title=https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png data-thumbnail=https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png data-sub-html="<h2>Snapshot</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png data-srcset="https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png, https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png 1.5x, https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png 2x" data-sizes=auto alt=https://img10.360buyimg.com/ddimg/jfs/t1/197044/17/6504/34435/6132f98dE5f9ae71e/c369de6313fbb493.png width=100%></a><figcaption class=image-caption>Snapshot</figcaption></figure><p>参考Etcd raft库的设计: 该库将raftLog分为<code>storage(stable)</code>和<code>unstable</code>.</p><p><code>Snapshot</code>定义:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-protobuf data-lang=protobuf><span class=line><span class=ln> 1</span><span class=cl><span class=kd>message</span> <span class=nc>SnapshotMetadata</span> <span class=p>{</span><span class=err>
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=err></span>	<span class=k>optional</span> <span class=n>ConfState</span> <span class=n>conf_state</span> <span class=o>=</span> <span class=mi>1</span> <span class=p>[(</span><span class=n>gogoproto.nullable</span><span class=p>)</span> <span class=o>=</span> <span class=kc>false</span><span class=p>];</span><span class=err>
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=err></span>	<span class=k>optional</span> <span class=kt>uint64</span>    <span class=n>index</span>      <span class=o>=</span> <span class=mi>2</span> <span class=p>[(</span><span class=n>gogoproto.nullable</span><span class=p>)</span> <span class=o>=</span> <span class=kc>false</span><span class=p>];</span><span class=err>
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=err></span>	<span class=k>optional</span> <span class=kt>uint64</span>    <span class=n>term</span>       <span class=o>=</span> <span class=mi>3</span> <span class=p>[(</span><span class=n>gogoproto.nullable</span><span class=p>)</span> <span class=o>=</span> <span class=kc>false</span><span class=p>];</span><span class=err>
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=err></span><span class=p>}</span><span class=err>
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=err>
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=err></span><span class=kd>message</span> <span class=nc>Snapshot</span> <span class=p>{</span><span class=err>
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=err></span>	<span class=k>optional</span> <span class=kt>bytes</span>            <span class=n>data</span>     <span class=o>=</span> <span class=mi>1</span><span class=p>;</span><span class=err>
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=err></span>	<span class=k>optional</span> <span class=n>SnapshotMetadata</span> <span class=n>metadata</span> <span class=o>=</span> <span class=mi>2</span> <span class=p>[(</span><span class=n>gogoproto.nullable</span><span class=p>)</span> <span class=o>=</span> <span class=kc>false</span><span class=p>];</span><span class=err>
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=err></span><span class=p>}</span><span class=err>
+</span></span></span></code></pre></div><p><code>storage.go</code>:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=ln> 1</span><span class=cl><span class=kd>type</span> <span class=nx>Storage</span> <span class=kd>interface</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>	<span class=c1>// TODO(tbg): split this into two interfaces, LogStorage and StateStorage.
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span>	<span class=c1>// InitialState returns the saved HardState and ConfState information.
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1></span>	<span class=nf>InitialState</span><span class=p>()</span> <span class=p>(</span><span class=nx>pb</span><span class=p>.</span><span class=nx>HardState</span><span class=p>,</span> <span class=nx>pb</span><span class=p>.</span><span class=nx>ConfState</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 5</span><span class=cl>	<span class=c1>// Entries returns a slice of log entries in the range [lo,hi).
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>	<span class=c1>// MaxSize limits the total size of the log entries returned, but
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1></span>	<span class=c1>// Entries returns at least one entry if any.
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1></span>	<span class=nf>Entries</span><span class=p>(</span><span class=nx>lo</span><span class=p>,</span> <span class=nx>hi</span><span class=p>,</span> <span class=nx>maxSize</span> <span class=kt>uint64</span><span class=p>)</span> <span class=p>([]</span><span class=nx>pb</span><span class=p>.</span><span class=nx>Entry</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln> 9</span><span class=cl>	<span class=c1>// Term returns the term of entry i, which must be in the range
+</span></span></span><span class=line><span class=ln>10</span><span class=cl><span class=c1></span>	<span class=c1>// [FirstIndex()-1, LastIndex()]. The term of the entry before
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1></span>	<span class=c1>// FirstIndex is retained for matching purposes even though the
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1></span>	<span class=c1>// rest of that entry may not be available.
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1></span>	<span class=nf>Term</span><span class=p>(</span><span class=nx>i</span> <span class=kt>uint64</span><span class=p>)</span> <span class=p>(</span><span class=kt>uint64</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=c1>// LastIndex returns the index of the last entry in the log.
+</span></span></span><span class=line><span class=ln>15</span><span class=cl><span class=c1></span>	<span class=nf>LastIndex</span><span class=p>()</span> <span class=p>(</span><span class=kt>uint64</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>16</span><span class=cl>	<span class=c1>// FirstIndex returns the index of the first log entry that is
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>	<span class=c1>// possibly available via Entries (older entries have been incorporated
+</span></span></span><span class=line><span class=ln>18</span><span class=cl><span class=c1></span>	<span class=c1>// into the latest Snapshot; if storage only contains the dummy entry the
+</span></span></span><span class=line><span class=ln>19</span><span class=cl><span class=c1></span>	<span class=c1>// first log entry is not available).
+</span></span></span><span class=line><span class=ln>20</span><span class=cl><span class=c1></span>	<span class=nf>FirstIndex</span><span class=p>()</span> <span class=p>(</span><span class=kt>uint64</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>21</span><span class=cl>	<span class=c1>// Snapshot returns the most recent snapshot.
+</span></span></span><span class=line><span class=ln>22</span><span class=cl><span class=c1></span>	<span class=c1>// If snapshot is temporarily unavailable, it should return ErrSnapshotTemporarilyUnavailable,
+</span></span></span><span class=line><span class=ln>23</span><span class=cl><span class=c1></span>	<span class=c1>// so raft state machine could know that Storage needs some time to prepare
+</span></span></span><span class=line><span class=ln>24</span><span class=cl><span class=c1></span>	<span class=c1>// snapshot and call Snapshot later.
+</span></span></span><span class=line><span class=ln>25</span><span class=cl><span class=c1></span>	<span class=nf>Snapshot</span><span class=p>()</span> <span class=p>(</span><span class=nx>pb</span><span class=p>.</span><span class=nx>Snapshot</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=ln>26</span><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=ln>27</span><span class=cl>
+</span></span><span class=line><span class=ln>28</span><span class=cl><span class=c1>// MemoryStorage implements the Storage interface backed by an
+</span></span></span><span class=line><span class=ln>29</span><span class=cl><span class=c1>// in-memory array.
+</span></span></span><span class=line><span class=ln>30</span><span class=cl><span class=c1></span><span class=kd>type</span> <span class=nx>MemoryStorage</span> <span class=kd>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln>31</span><span class=cl>	<span class=c1>// Protects access to all fields. Most methods of MemoryStorage are
+</span></span></span><span class=line><span class=ln>32</span><span class=cl><span class=c1></span>	<span class=c1>// run on the raft goroutine, but Append() is run on an application
+</span></span></span><span class=line><span class=ln>33</span><span class=cl><span class=c1></span>	<span class=c1>// goroutine.
+</span></span></span><span class=line><span class=ln>34</span><span class=cl><span class=c1></span>	<span class=nx>sync</span><span class=p>.</span><span class=nx>Mutex</span>
+</span></span><span class=line><span class=ln>35</span><span class=cl>	<span class=nx>hardState</span> <span class=nx>pb</span><span class=p>.</span><span class=nx>HardState</span>
+</span></span><span class=line><span class=ln>36</span><span class=cl>	<span class=nx>snapshot</span>  <span class=nx>pb</span><span class=p>.</span><span class=nx>Snapshot</span>
+</span></span><span class=line><span class=ln>37</span><span class=cl>	<span class=c1>// ents[i] has raft log position i+snapshot.Metadata.Index
+</span></span></span><span class=line><span class=ln>38</span><span class=cl><span class=c1></span>	<span class=nx>ents</span> <span class=p>[]</span><span class=nx>pb</span><span class=p>.</span><span class=nx>Entry</span>
+</span></span><span class=line><span class=ln>39</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p><code>log.go</code>:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=ln> 1</span><span class=cl><span class=kd>type</span> <span class=nx>raftLog</span> <span class=kd>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 2</span><span class=cl>	<span class=c1>// storage contains all stable entries since the last snapshot.
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1></span>	<span class=nx>storage</span> <span class=nx>Storage</span>
+</span></span><span class=line><span class=ln> 4</span><span class=cl>	<span class=c1>// unstable contains all unstable entries and snapshot.
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1></span>	<span class=c1>// they will be saved into storage.
+</span></span></span><span class=line><span class=ln> 6</span><span class=cl><span class=c1></span>	<span class=nx>unstable</span> <span class=nx>unstable</span>
+</span></span><span class=line><span class=ln> 7</span><span class=cl>	<span class=c1>// committed is the highest log position that is known to be in
+</span></span></span><span class=line><span class=ln> 8</span><span class=cl><span class=c1></span>	<span class=c1>// stable storage on a quorum of nodes.
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1></span>	<span class=nx>committed</span> <span class=kt>uint64</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=c1>// applied is the highest log position that the application has
+</span></span></span><span class=line><span class=ln>11</span><span class=cl><span class=c1></span>	<span class=c1>// been instructed to apply to its state machine.
+</span></span></span><span class=line><span class=ln>12</span><span class=cl><span class=c1></span>	<span class=c1>// Invariant: applied &lt;= committed
+</span></span></span><span class=line><span class=ln>13</span><span class=cl><span class=c1></span>	<span class=nx>applied</span> <span class=kt>uint64</span>
+</span></span><span class=line><span class=ln>14</span><span class=cl>	<span class=nx>logger</span> <span class=nx>Logger</span>
+</span></span><span class=line><span class=ln>15</span><span class=cl>	<span class=c1>// maxNextEntsSize is the maximum number aggregate byte size of the messages
+</span></span></span><span class=line><span class=ln>16</span><span class=cl><span class=c1></span>	<span class=c1>// returned from calls to nextEnts.
+</span></span></span><span class=line><span class=ln>17</span><span class=cl><span class=c1></span>	<span class=nx>maxNextEntsSize</span> <span class=kt>uint64</span>
+</span></span><span class=line><span class=ln>18</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p><code>log_unstable.go</code>:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=ln> 1</span><span class=cl><span class=c1>// unstable.entries[i] has raft log position i+unstable.offset.
+</span></span></span><span class=line><span class=ln> 2</span><span class=cl><span class=c1>// Note that unstable.offset may be less than the highest log
+</span></span></span><span class=line><span class=ln> 3</span><span class=cl><span class=c1>// position in storage; this means that the next write to storage
+</span></span></span><span class=line><span class=ln> 4</span><span class=cl><span class=c1>// might need to truncate the log before persisting unstable.entries.
+</span></span></span><span class=line><span class=ln> 5</span><span class=cl><span class=c1></span><span class=kd>type</span> <span class=nx>unstable</span> <span class=kd>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=ln> 6</span><span class=cl>	<span class=c1>// the incoming unstable snapshot, if any.
+</span></span></span><span class=line><span class=ln> 7</span><span class=cl><span class=c1></span>	<span class=nx>snapshot</span> <span class=o>*</span><span class=nx>pb</span><span class=p>.</span><span class=nx>Snapshot</span>
+</span></span><span class=line><span class=ln> 8</span><span class=cl>	<span class=c1>// all entries that have not yet been written to storage.
+</span></span></span><span class=line><span class=ln> 9</span><span class=cl><span class=c1></span>	<span class=nx>entries</span> <span class=p>[]</span><span class=nx>pb</span><span class=p>.</span><span class=nx>Entry</span>
+</span></span><span class=line><span class=ln>10</span><span class=cl>	<span class=nx>offset</span>  <span class=kt>uint64</span>
+</span></span><span class=line><span class=ln>11</span><span class=cl>	<span class=nx>logger</span> <span class=nx>Logger</span>
+</span></span><span class=line><span class=ln>12</span><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>用一张图来直观的展示:</p><figure><a class=lightgallery href=https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png title=https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png data-thumbnail=https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png data-sub-html="<h2>Etcd raft日志结构</h2>"><img class=lazyload src=/svg/loading.min.svg data-src=https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png data-srcset="https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png, https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png 1.5x, https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png 2x" data-sizes=auto alt=https://img13.360buyimg.com/ddimg/jfs/t1/199141/28/10401/59336/61527466E14991b7b/f743750a346e0b7e.png width=100%></a><figcaption class=image-caption>Etcd raft日志结构</figcaption></figure><h2 id=see-also>See Also</h2><p>Raft Paper: <a href=https://raft.github.io/raft.pdf target=_blank rel="noopener noreffer">https://raft.github.io/raft.pdf</a></p><p>Etcd Raft lib: <a href=https://github.com/etcd-io/etcd/tree/main/raft target=_blank rel="noopener noreffer">https://github.com/etcd-io/etcd/tree/main/raft</a></p><p>Availability and Region Failure: Joint Consensus in CockroachDB: <a href=https://www.cockroachlabs.com/blog/joint-consensus-raft/ target=_blank rel="noopener noreffer">https://www.cockroachlabs.com/blog/joint-consensus-raft</a></p></div><div class=post-footer id=post-footer><div class=post-info><div class=post-info-line><div class=post-info-mod><span>更新于 2022-07-08&nbsp;<a class=git-hash href=https://github.com/phoon/phoon.github.io/commit/e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6 target=_blank title="commit by PevenPhoon(iampeven@gmail.com) e8ee37b87a5c81c8e8876ffd427ad3d3e6888ea6: action add clone theme">
+<i class="fas fa-hashtag fa-fw" aria-hidden=true></i>e8ee37b</a></span></div></div><div class=post-info-line><div class=post-info-md></div><div class=post-info-share><span><a href=javascript:void(0); title="分享到 Twitter" data-sharer=twitter data-url=https://blog.peven.me/post/2021/09/04/raft-in-breif/ data-title="Raft in breif" data-hashtags="raft,Distributed System"><i class="fab fa-twitter fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Facebook" data-sharer=facebook data-url=https://blog.peven.me/post/2021/09/04/raft-in-breif/ data-hashtag=raft><i class="fab fa-facebook-square fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Hacker News" data-sharer=hackernews data-url=https://blog.peven.me/post/2021/09/04/raft-in-breif/ data-title="Raft in breif"><i class="fab fa-hacker-news fa-fw" aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 Line" data-sharer=line data-url=https://blog.peven.me/post/2021/09/04/raft-in-breif/ data-title="Raft in breif"><i data-svg-src=https://unpkg.com/simple-icons@7.0.0/icons/line.svg aria-hidden=true></i></a><a href=javascript:void(0); title="分享到 微博" data-sharer=weibo data-url=https://blog.peven.me/post/2021/09/04/raft-in-breif/ data-title="Raft in breif"><i class="fab fa-weibo fa-fw" aria-hidden=true></i></a></span></div></div></div><div class=post-info-more><section class=post-tags><i class="fas fa-tags fa-fw" aria-hidden=true></i>&nbsp;<a href=/tags/raft/>raft</a>,&nbsp;<a href=/tags/distributed-system/>Distributed System</a></section><section><span><a href=javascript:void(0); onclick=window.history.back()>返回</a></span>&nbsp;|&nbsp;<span><a href=/>主页</a></span></section></div><div class=post-nav><a href=/post/2021/08/21/dgraph-memo/ class=prev rel=prev title=Dgraph备忘录><i class="fas fa-angle-left fa-fw" aria-hidden=true></i>Dgraph备忘录</a>
+<a href=/post/2021/10/06/innodb-doublewrite/ class=next rel=next title="InnoDB Doublewrite机制">InnoDB Doublewrite机制<i class="fas fa-angle-right fa-fw" aria-hidden=true></i></a></div></div></article></div></main><footer class=footer><div class=footer-container><div class=footer-line>由 <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.101.0">Hugo</a> 强力驱动 | 主题 - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.11"><i class="far fa-kiss-wink-heart fa-fw" aria-hidden=true></i> LoveIt</a></div><div class=footer-line itemscope itemtype=http://schema.org/CreativeWork><i class="far fa-copyright fa-fw" aria-hidden=true></i><span itemprop=copyrightYear>2018 - 2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=https://blog.peven.me target=_blank>Peven</a></span>&nbsp;|&nbsp;<span class=license><a rel="license external nofollow noopener noreffer" href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank>CC BY-NC 4.0</a></span></div></div></footer></div><div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title=回到顶部><i class="fas fa-arrow-up fa-fw" aria-hidden=true></i>
+</a><a href=# id=view-comments class=fixed-button title=查看评论><i class="fas fa-comment fa-fw" aria-hidden=true></i></a></div><link rel=stylesheet href=https://unpkg.com/lightgallery@2.4.0/css/lightgallery-bundle.min.css><link rel=stylesheet href=https://unpkg.com/katex@0.15.6/dist/katex.min.css><script type=text/javascript src=https://unpkg.com/autocomplete.js@0.38.1/dist/autocomplete.min.js></script><script type=text/javascript src=https://unpkg.com/lunr@2.3.9/lunr.min.js></script><script type=text/javascript src=/lib/lunr/lunr.stemmer.support.min.js></script><script type=text/javascript src=/lib/lunr/lunr.zh.min.js></script><script type=text/javascript src=https://unpkg.com/lazysizes@5.3.1/lazysizes.min.js></script><script type=text/javascript src=https://unpkg.com/lightgallery@2.4.0/lightgallery.min.js></script><script type=text/javascript src=https://unpkg.com/lightgallery@2.4.0/plugins/thumbnail/lg-thumbnail.min.js></script><script type=text/javascript src=https://unpkg.com/lightgallery@2.4.0/plugins/zoom/lg-zoom.min.js></script><script type=text/javascript src=https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js></script><script type=text/javascript src=https://unpkg.com/sharer.js@0.5.1/sharer.min.js></script><script type=text/javascript src=https://unpkg.com/katex@0.15.6/dist/katex.min.js></script><script type=text/javascript src=https://unpkg.com/katex@0.15.6/dist/contrib/auto-render.min.js></script><script type=text/javascript src=https://unpkg.com/katex@0.15.6/dist/contrib/copy-tex.min.js></script><script type=text/javascript src=https://unpkg.com/katex@0.15.6/dist/contrib/mhchem.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"复制到剪贴板",maxShownLines:40},comment:{},lightgallery:!0,math:{delimiters:[{display:!0,left:"$$",right:"$$"},{display:!0,left:"\\[",right:"\\]"},{display:!0,left:"\\begin{equation}",right:"\\end{equation}"},{display:!0,left:"\\begin{equation*}",right:"\\end{equation*}"},{display:!0,left:"\\begin{align}",right:"\\end{align}"},{display:!0,left:"\\begin{align*}",right:"\\end{align*}"},{display:!0,left:"\\begin{alignat}",right:"\\end{alignat}"},{display:!0,left:"\\begin{alignat*}",right:"\\end{alignat*}"},{display:!0,left:"\\begin{gather}",right:"\\end{gather}"},{display:!0,left:"\\begin{CD}",right:"\\end{CD}"},{display:!1,left:"$",right:"$"},{display:!1,left:"\\(",right:"\\)"}],strict:!1},search:{highlightTag:"em",lunrIndexURL:"/index.json",lunrLanguageCode:"zh",lunrSegmentitURL:"/lib/lunr/lunr.segmentit.js",maxResultLength:10,noResultsFound:"没有找到结果",snippetLength:50,type:"lunr"}}</script><script type=text/javascript src=/js/theme.min.js></script></body></html>
