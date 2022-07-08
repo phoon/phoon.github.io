@@ -154,7 +154,8 @@ value = <0xab, 0xbc, 0xcd, ...>
 
 ```shell
 docker stop dgraph-alpha # 或复制一份p文件夹
-docker debug -p Dgrpah/p
+dgraph debug -p Dgrpah/p
 # 具体使用方法
-docker debug -h
+dgraph debug -h
 ```
+
